@@ -38,21 +38,25 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 {
 	m_iTestCase = testCase;
 
+	// Setup:
+	Vec3 p0 = Vec3(0, 0, 0);
+	Vec3 v0 = Vec3(-1, 0, 0);
+	Vec3 p1 = Vec3(0, 2, 0);
+	Vec3 v1 = Vec3(1, 0, 0);
+	float m0 = 10, m1 = 10;
+
+	Point pt0 = Point(p0, v0, m0);
+	Point pt1 = Point(p1, v1, m1);
+
+	point.push_back(pt0);
+	point.push_back(pt1);
+
 	switch (testCase)
 	{
 		case 0:
 		{
 			cout << "Demo 1 selected.\n\n";
 
-			// Setup:
-			Vec3 p0 = Vec3(0, 0, 0);
-			Vec3 v0 = Vec3(-1, 0, 0);
-			Vec3 p1 = Vec3(0, 2, 0);
-			Vec3 v1 = Vec3(1, 0, 0);
-			float m0 = 10, m1 = 10;
-
-			Point pt0 = Point(p0, v0, m0);
-			Point pt1 = Point(p1, v1, m1);
 
 			Spring s = Spring(40, 1, pt0, pt1);
 
