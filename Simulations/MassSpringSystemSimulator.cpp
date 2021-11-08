@@ -36,6 +36,8 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 
 void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 {
+	m_iTestCase = testCase;
+
 	switch (testCase)
 	{
 		case 0:
