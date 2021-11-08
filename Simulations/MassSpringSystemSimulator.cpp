@@ -32,44 +32,49 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 
 void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 {
-	if (testCase == 0)
+	switch (testCase)
 	{
-		cout << "Demo 1 selected.\n\n";
+		case 0:
+		{
+			cout << "Demo 1 selected.\n\n";
 
-		// Setup:
-		Vec3 p0 = Vec3(0, 0, 0);
-		Vec3 v0 = Vec3(-1, 0, 0);
-		Vec3 p1 = Vec3(0, 2, 0);
-		Vec3 v1 = Vec3(1, 0, 0);
-		float m0 = 10, m1 = 10;
+			// Setup:
+			Vec3 p0 = Vec3(0, 0, 0);
+			Vec3 v0 = Vec3(-1, 0, 0);
+			Vec3 p1 = Vec3(0, 2, 0);
+			Vec3 v1 = Vec3(1, 0, 0);
+			float m0 = 10, m1 = 10;
 
-		Point pt0 = Point(p0,v0,m0);
-		Point pt1 = Point(p1,v1,m1);
+			Point pt0 = Point(p0, v0, m0);
+			Point pt1 = Point(p1, v1, m1);
 
-		Spring s = Spring(40, 1, pt0, pt1);
+			Spring s = Spring(40, 1, pt0, pt1);
 
-		cout << "Euler: \n";
-		Spring s1 = s.makeEulerStep(0.1);
-		cout << "position p1: " << s1.getP1().getPosition() << "\n";
-		cout << "position p2: " << s1.getP2().getPosition() << "\n\n";
+			cout << "Euler: \n";
+			Spring s1 = s.makeEulerStep(0.1);
+			cout << "position p1: " << s1.getP1().getPosition() << "\n";
+			cout << "position p2: " << s1.getP2().getPosition() << "\n\n";
 
 
-		cout << "Midpoint: \n";
+			cout << "Midpoint: \n";
 
-		Spring sm = s.makeEulerStep(0.05);
-		cout << "position p1: " << sm.getP1().getPosition() << "\n";
-		cout << "position p2: " << sm.getP2().getPosition() << "\n";
-		cout << "velocity p1: " << sm.getP1().getVelocity() << "\n";
-		cout << "velocity p2: " << sm.getP2().getVelocity() << "\n";
+			Spring sm = s.makeEulerStep(0.05);
+			cout << "position p1: " << sm.getP1().getPosition() << "\n";
+			cout << "position p2: " << sm.getP2().getPosition() << "\n";
+			cout << "velocity p1: " << sm.getP1().getVelocity() << "\n";
+			cout << "velocity p2: " << sm.getP2().getVelocity() << "\n";
 
-		pt0.setVelocity(sm.getP1().getVelocity());
-		pt1.setVelocity(sm.getP2().getVelocity());
+			pt0.setVelocity(sm.getP1().getVelocity());
+			pt1.setVelocity(sm.getP2().getVelocity());
 
-		s = Spring(40, 1, pt0, pt1);
-		s1 = s.makeEulerStep(0.1);
-		cout << "position p1: " << s1.getP1().getPosition() << "\n";
-		cout << "position p2: " << s1.getP2().getPosition() << "\n\n";
-
+			s = Spring(40, 1, pt0, pt1);
+			s1 = s.makeEulerStep(0.1);
+			cout << "position p1: " << s1.getP1().getPosition() << "\n";
+			cout << "position p2: " << s1.getP2().getPosition() << "\n\n";
+		}
+		break;
+		default:
+		break;
 	}
 }
 
