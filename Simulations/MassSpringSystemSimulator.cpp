@@ -20,7 +20,11 @@ const char* MassSpringSystemSimulator::getTestCasesStr() {
 	return "Demo 1";
 }
 
-void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC) {}
+void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
+{
+	this->DUC = DUC;
+}
+
 void MassSpringSystemSimulator::reset()
 {
 	m_mouse.x = m_mouse.y = 0;
