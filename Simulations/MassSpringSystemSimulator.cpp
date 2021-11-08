@@ -54,6 +54,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 			Spring s = Spring(40, 1, pt0, pt1);
 
+
 			cout << "Euler: \n";
 			Spring s1 = s.makeEulerStep(0.1);
 			cout << "position p1: " << s1.getP1().getPosition() << "\n";
@@ -61,7 +62,6 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 
 			cout << "Midpoint: \n";
-
 			Spring sm = s.makeEulerStep(0.05);
 			cout << "position p1: " << sm.getP1().getPosition() << "\n";
 			cout << "position p2: " << sm.getP2().getPosition() << "\n";
@@ -83,6 +83,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 }
 
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {}
+
 void MassSpringSystemSimulator::simulateTimestep(float timeStep) {}
 
 void MassSpringSystemSimulator::onClick(int x, int y)
