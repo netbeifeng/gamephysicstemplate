@@ -1,5 +1,4 @@
-#ifndef MASSPOINT_h
-#define MASSPOINT_h
+#pragma once
 
 #include "util/vectorbase.h"
 using namespace GamePhysics;
@@ -39,4 +38,3 @@ Point Point::applyForce(Vec3 f, float timestep)
 	return Point(pos,vel,mass);
 }
 
-#endif
