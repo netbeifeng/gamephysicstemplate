@@ -48,6 +48,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	Point pt0 = Point(p0, v0, m0);
 	Point pt1 = Point(p1, v1, m1);
 
+	point.clear();
 	point.push_back(pt0);
 	point.push_back(pt1);
 
