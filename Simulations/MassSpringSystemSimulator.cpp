@@ -50,9 +50,10 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 	Spring s = Spring(40, 1, pt0, pt1);
 
-	point.clear();
-	point.push_back(pt0);
-	point.push_back(pt1);
+	// Push points onto the attribute
+	points.clear();
+	points.push_back(pt0);
+	points.push_back(pt1);
 
 	switch (testCase)
 	{

@@ -51,7 +51,7 @@ private:
 	int m_iIntegrator;
 
 	// Additional Data Attributes
-	vector<Point> point;
+	vector<Point> points;
 
 	// UI Attributes
 	Vec3 m_externalForce;
