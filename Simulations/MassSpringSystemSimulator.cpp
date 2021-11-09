@@ -78,26 +78,20 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			cout << "Demo 1 selected.\n\n";
 
 			cout << "Euler: \n";
-			Spring s1 = s.makeEulerStep(0.1);
-			cout << "position p1: " << s1.getP1().getPosition() << "\n";
-			cout << "position p2: " << s1.getP2().getPosition() << "\n\n";
+			makeEulerStep(0.1);
+			cout << "position p1: " << springs[0].getP1().getPosition() << "\n";
+			cout << "position p2: " << springs[0].getP2().getPosition() << "\n\n";
 
+
+			// Reset scene
+			points[0] = pt0;
+			points[1] = pt1;
+			springs[0] = s;
 
 			cout << "Midpoint: \n";
-			Spring sm = s.makeEulerStep(0.05);
-			cout << "position p1: " << sm.getP1().getPosition() << "\n";
-			cout << "position p2: " << sm.getP2().getPosition() << "\n";
-			cout << "velocity p1: " << sm.getP1().getVelocity() << "\n";
-			cout << "velocity p2: " << sm.getP2().getVelocity() << "\n";
-
-			cout << "Result: \n";
-			pt0.setVelocity(sm.getP1().getVelocity());
-			pt1.setVelocity(sm.getP2().getVelocity());
-
-			s = Spring(40, 1, pt0, pt1);
-			s1 = s.makeEulerStep(0.1);
-			cout << "position p1: " << s1.getP1().getPosition() << "\n";
-			cout << "position p2: " << s1.getP2().getPosition() << "\n\n";
+			makeMidpointStep(0.1);
+			cout << "position p1: " << springs[0].getP1().getPosition() << "\n";
+			cout << "position p2: " << springs[0].getP2().getPosition() << "\n\n";
 		}
 		break;
 
