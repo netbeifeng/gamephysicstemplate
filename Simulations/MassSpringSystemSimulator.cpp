@@ -88,6 +88,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			cout << "velocity p1: " << sm.getP1().getVelocity() << "\n";
 			cout << "velocity p2: " << sm.getP2().getVelocity() << "\n";
 
+			cout << "Result: \n";
 			pt0.setVelocity(sm.getP1().getVelocity());
 			pt1.setVelocity(sm.getP2().getVelocity());
 
