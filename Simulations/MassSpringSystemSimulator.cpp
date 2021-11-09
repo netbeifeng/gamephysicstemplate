@@ -17,7 +17,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 1";
+	return "Demo 1,Demo 2";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -32,7 +32,18 @@ void MassSpringSystemSimulator::reset()
 	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
 }
 
-void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {}
+void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {
+	switch (m_iTestCase)
+	{
+	case 1:
+		DUC->beginLine();
+		DUC->drawLine(points[0].getPosition(),Vec3(1,0,0) , points[1].getPosition() ,Vec3(0,1,0));
+		DUC->endLine();
+		break;
+	default:
+		break;
+	}
+}
 
 void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 {
@@ -86,6 +97,13 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			cout << "position p2: " << s1.getP2().getPosition() << "\n\n";
 		}
 		break;
+
+		case 1:
+		{
+			cout << "Demo 2 selected.\n\n";
+		}
+		break;
+
 		default:
 		break;
 	}
@@ -93,7 +111,23 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {}
 
-void MassSpringSystemSimulator::simulateTimestep(float timeStep) {}
+void MassSpringSystemSimulator::simulateTimestep(float timeStep)
+{
+	switch (m_iTestCase)
+	{
+	case 1:
+		makeEulerStep(0.005);
+		break;
+	default:
+		break;
+	}
+}
+
+void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
+	springs[0] = springs[0].makeEulerStep(timeStep);
+	points[0] = springs[0].getP1();
+	points[1] = springs[0].getP2();
+}
 
 void MassSpringSystemSimulator::onClick(int x, int y)
 {
