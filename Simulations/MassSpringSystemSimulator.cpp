@@ -48,6 +48,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	Point pt0 = Point(p0, v0, m0);
 	Point pt1 = Point(p1, v1, m1);
 
+	Spring s = Spring(40, 1, pt0, pt1);
+
 	point.clear();
 	point.push_back(pt0);
 	point.push_back(pt1);
@@ -57,10 +59,6 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		case 0:
 		{
 			cout << "Demo 1 selected.\n\n";
-
-
-			Spring s = Spring(40, 1, pt0, pt1);
-
 
 			cout << "Euler: \n";
 			Spring s1 = s.makeEulerStep(0.1);
