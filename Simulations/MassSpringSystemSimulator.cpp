@@ -49,27 +49,44 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 {
 	m_iTestCase = testCase;
 
-	// Setup:
-	Vec3 p0 = Vec3(0, 0, 0);
-	Vec3 v0 = Vec3(-1, 0, 0);
-	Vec3 p1 = Vec3(0, 2, 0);
-	Vec3 v1 = Vec3(1, 0, 0);
-	float m0 = 10, m1 = 10;
+	// For Demos 1-3
+	Point pt0, pt1;
+	Spring s;
+	float m0, m1;
+	Vec3 p0, p1, v0, v1;
 
-	// The point objects:
-	Point pt0 = Point(p0, v0, m0);
-	Point pt1 = Point(p1, v1, m1);
+	// ** Setup Scene ** //
+	switch (testCase)
+	{
+	// Setup for Demos 1-3 (Table 1.1)
+	case 0: case 1: case 2:
+		// Points
+		p0 = Vec3(0, 0, 0);
+		v0 = Vec3(-1, 0, 0);
+		p1 = Vec3(0, 2, 0);
+		v1 = Vec3(1, 0, 0);
+		m0 = 10, m1 = 10;
 
-	// The spring object:
-	Spring s = Spring(40, 1, pt0, pt1);
+		// The point objects:
+		pt0 = Point(p0, v0, m0);
+		pt1 = Point(p1, v1, m1);
 
-	// Push points onto the attribute
-	points.clear();
-	points.push_back(pt0);
-	points.push_back(pt1);
+		// The spring object:
+		s = Spring(40, 1, pt0, pt1);
 
-	springs.clear();
-	springs.push_back(s);
+		// Push points onto the attribute
+		points.clear();
+		points.push_back(pt0);
+		points.push_back(pt1);
+
+		springs.clear();
+		springs.push_back(s);
+
+		break;
+
+	default:
+		break;
+	}
 
 	switch (testCase)
 	{
