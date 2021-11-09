@@ -7,7 +7,7 @@ using namespace GamePhysics;
 class Spring
 {
 public:
-	Spring(float k, float L, Point p1, Point p2);
+	Spring(float k = 0, float L = 0, Point p1 = Point(), Point p2= Point());
 
 	float getRestLength();
 	float getStiffness();
