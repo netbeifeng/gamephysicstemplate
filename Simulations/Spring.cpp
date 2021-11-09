@@ -8,6 +8,8 @@ Spring::Spring(float k, float L, Point pt1, Point pt2)
 	p2 = pt2;
 }
 
+float Spring::getRestLength() { return restLength; }
+float Spring::getStiffness() { return stiffness; }
 Point Spring::getP1() { return p1; }
 Point Spring::getP2() { return p2; }
 

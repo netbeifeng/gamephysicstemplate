@@ -9,6 +9,8 @@ class Spring
 public:
 	Spring(float k, float L, Point p1, Point p2);
 
+	float getRestLength();
+	float getStiffness();
 	Point getP1();
 	Point getP2();
 
