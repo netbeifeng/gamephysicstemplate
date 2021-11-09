@@ -2,6 +2,7 @@
 #define MASSSPRINGSYSTEMSIMULATOR_h
 #include "Simulator.h"
 #include "MassPoint.h"
+#include "Spring.h"
 
 // Do Not Change
 #define EULER 0
@@ -52,6 +53,7 @@ private:
 
 	// Additional Data Attributes
 	vector<Point> points;
+	vector<Spring> springs;
 
 	// UI Attributes
 	Vec3 m_externalForce;

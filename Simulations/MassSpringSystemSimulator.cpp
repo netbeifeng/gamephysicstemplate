@@ -55,6 +55,9 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	points.push_back(pt0);
 	points.push_back(pt1);
 
+	springs.clear();
+	springs.push_back(s);
+
 	switch (testCase)
 	{
 		case 0:
