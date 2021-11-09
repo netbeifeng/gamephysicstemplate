@@ -21,6 +21,9 @@ Vec3 Spring::getHookeForce()
 	return force;
 }
 
+/*
+* Returns a new Spring object after an Euler step. The current object remains unchanged.
+*/
 Spring Spring::makeEulerStep(float timestep)
 {
 	Vec3 f1 = getHookeForce();

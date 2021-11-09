@@ -56,9 +56,11 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	Vec3 v1 = Vec3(1, 0, 0);
 	float m0 = 10, m1 = 10;
 
+	// The point objects:
 	Point pt0 = Point(p0, v0, m0);
 	Point pt1 = Point(p1, v1, m1);
 
+	// The spring object:
 	Spring s = Spring(40, 1, pt0, pt1);
 
 	// Push points onto the attribute
