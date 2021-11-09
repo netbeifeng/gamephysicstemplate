@@ -17,7 +17,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2";
+	return "Demo 1,Demo 2,Demo 3";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -35,7 +35,7 @@ void MassSpringSystemSimulator::reset()
 void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {
 	switch (m_iTestCase)
 	{
-	case 1:
+	case 1: case 2:
 		DUC->beginLine();
 		DUC->drawLine(points[0].getPosition(),Vec3(1,0,0) , points[1].getPosition() ,Vec3(0,1,0));
 		DUC->endLine();
@@ -104,6 +104,12 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		}
 		break;
 
+		case 2:
+		{
+			cout << "Demo 3 selected.\n\n";
+		}
+		break;
+
 		default:
 		break;
 	}
@@ -118,12 +124,25 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	case 1:
 		makeEulerStep(0.005);
 		break;
+	case 2:
+		makeMidpointStep(0.005);
+		break;
 	default:
 		break;
 	}
 }
 
 void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
+	springs[0] = springs[0].makeEulerStep(timeStep);
+	points[0] = springs[0].getP1();
+	points[1] = springs[0].getP2();
+}
+
+void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
+	Spring midPointSpring = springs[0].makeEulerStep(timeStep/2);
+	points[0].setVelocity(midPointSpring.getP1().getVelocity());
+	points[1].setVelocity(midPointSpring.getP2().getVelocity());
+	springs[0] = Spring(springs[0].getStiffness(), springs[0].getRestLength(), points[0], points[1]);
 	springs[0] = springs[0].makeEulerStep(timeStep);
 	points[0] = springs[0].getP1();
 	points[1] = springs[0].getP2();

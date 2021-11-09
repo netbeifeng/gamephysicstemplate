@@ -41,6 +41,7 @@ public:
 
 	// Additional Functions
 	void makeEulerStep(float);
+	void makeMidpointStep(float);
 
 	// Do Not Change
 	void setIntegrator(int integrator) {
