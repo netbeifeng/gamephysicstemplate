@@ -206,9 +206,11 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 		break;
 	case 3:
 		makeEulerStep(timeStep);
+		enforceFloorBoundary();
 		break;
 	case 4:
 		makeMidpointStep(timeStep);
+		enforceFloorBoundary();
 		break;
 	default:
 		break;
@@ -277,6 +279,17 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 		points[i]->integrateWithMidpoint(timeStep, midpoints[i]);
 	}
 	for (auto p : midpoints) { delete p; }
+}
+
+void MassSpringSystemSimulator::enforceFloorBoundary()
+{
+	for each (Point* p in points)
+	{
+		Vec3 pos = p->getPosition();
+		if (pos.y < -0.5) {
+			p->setPosition(Vec3(pos.x, -0.5, pos.z));
+		}
+	}
 }
 
 void MassSpringSystemSimulator::onClick(int x, int y)
