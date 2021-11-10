@@ -17,7 +17,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3";
+	return "Demo 1,Demo 2,Demo 3,Demo 4";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -52,6 +52,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	float m0, m1;
 	Vec3 p0, p1, v0, v1;
 
+	float restLen = 0.3;
 	// ** Setup Scene ** //
 	switch (testCase)
 	{
@@ -80,6 +81,46 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		springs.clear();
 		springs.push_back(s);
 
+		break;
+
+	case 3:
+		for (auto p : points) { delete p; }
+		points.clear();
+		for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				p0 = Vec3(-0.5 + j*0.3, 0.5 - i*0.3, 0);
+				if ((i == 0) && (j == 0 || j == 2))
+				{
+					v0 = Vec3(0, 1, 0);
+				}
+				else {
+					v0 = Vec3(0, 0, 0);
+				}
+				points.push_back(new Point(p0, v0, Vec3(0,0,0), 10));
+			}
+		}
+
+		springs.clear();
+		// Horizontal connections
+		for (int i = 0; i < 4; i++)
+		{
+			s = Spring(40, restLen, i * 3, i * 3 + 1);
+			springs.push_back(s);
+			s = Spring(40, restLen, i * 3 +1, i * 3 + 2);
+			springs.push_back(s);
+		}
+		// Vertical connections
+		for (int j = 0; j < 3; j++)
+		{
+			s = Spring(40, restLen, 0+j, 3 + j);
+			springs.push_back(s);
+			s = Spring(40, restLen, 3 + j, 6 + j);
+			springs.push_back(s);
+			s = Spring(40, restLen, 6 + j, 9 + j);
+			springs.push_back(s);
+		}
 		break;
 
 	default:
@@ -130,6 +171,11 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		}
 		break;
 
+		case 3:
+		{
+			cout << "Demo 4 selected.\n\n";
+		}
+		break;
 		default:
 		break;
 	}
@@ -146,6 +192,9 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 		break;
 	case 2:
 		makeMidpointStep(0.005);
+		break;
+	case 3:
+		makeEulerStep(timeStep);
 		break;
 	default:
 		break;
