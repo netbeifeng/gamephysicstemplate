@@ -33,16 +33,13 @@ void MassSpringSystemSimulator::reset()
 }
 
 void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {
-	switch (m_iTestCase)
+	// Draw line for each spring
+	DUC->beginLine();
+	for each (Spring s in springs)
 	{
-	case 1: case 2:
-		DUC->beginLine();
-		DUC->drawLine(points[0].getPosition(),Vec3(1,0,0) , points[1].getPosition() ,Vec3(0,1,0));
-		DUC->endLine();
-		break;
-	default:
-		break;
+		DUC->drawLine(s.getP1().getPosition(), Vec3(1, 0, 0), s.getP2().getPosition(), Vec3(0, 1, 0));
 	}
+	DUC->endLine();
 }
 
 void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
