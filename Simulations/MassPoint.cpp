@@ -8,6 +8,7 @@ Point::Point(Vec3 p, Vec3 v, Vec3 f, float m)
 	mass = m;
 }
 
+void Point::setPosition(Vec3 p) { position = p; }
 void Point::setVelocity(Vec3 v) { velocity = v; }
 
 Vec3 Point::getPosition() { return position; }
