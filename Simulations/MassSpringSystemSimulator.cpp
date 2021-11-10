@@ -299,9 +299,24 @@ void MassSpringSystemSimulator::addSpring(int masspoint1, int masspoint2, float 
 
 // Getters
 
-int MassSpringSystemSimulator::getNumberOfMassPoints() { return 0; };
-int MassSpringSystemSimulator::getNumberOfSprings() { return 0; };
-Vec3 MassSpringSystemSimulator::getPositionOfMassPoint(int index) { return Vec3(); };
+int MassSpringSystemSimulator::getNumberOfMassPoints()
+{
+	return points.size();
+}
 
-Vec3 MassSpringSystemSimulator::getVelocityOfMassPoint(int index) { return Vec3(); };
+int MassSpringSystemSimulator::getNumberOfSprings()
+{
+	return springs.size();
+}
+
+Vec3 MassSpringSystemSimulator::getPositionOfMassPoint(int index)
+{
+	return points[index]->getPosition();
+}
+
+Vec3 MassSpringSystemSimulator::getVelocityOfMassPoint(int index)
+{
+	return points[index]->getVelocity();
+}
+
 void MassSpringSystemSimulator::applyExternalForce(Vec3 force) {};
