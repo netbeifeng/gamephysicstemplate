@@ -1,11 +1,12 @@
 #include "MassPoint.h"
 
-Point::Point(Vec3 p, Vec3 v, Vec3 f, float m)
+Point::Point(Vec3 p, Vec3 v, Vec3 f, float m, bool b)
 {
 	position = p;
 	velocity = v;
 	force = f;
 	mass = m;
+	fixed = b;
 }
 
 void Point::setPosition(Vec3 p) { position = p; }
@@ -16,17 +17,20 @@ Vec3 Point::getVelocity() { return velocity; }
 Vec3 Point::getForce() { return force; }
 
 void Point::clearForce() {
-	force = Vec3(0, 0, 0);
+	if (!fixed)
+		force = Vec3(0, 0, 0);
 }
 
 void Point::addForce(Vec3 f)
 {
-	force += f;
+	if (!fixed)
+		force += f;
 }
 
 void Point::addAcceleration(Vec3 a)
 {
-	force += a / mass;
+	if (!fixed)
+		force += a / mass;
 }
 
 Point* Point::integrated(float timestep)
@@ -39,16 +43,22 @@ Point* Point::integrated(float timestep)
 
 void Point::integrate(float timestep)
 {
-	position = position + timestep * velocity;
+	if (!fixed)
+	{
+		position = position + timestep * velocity;
 
-	Vec3 accel = force / mass;
-	velocity = velocity + timestep * accel;
+		Vec3 accel = force / mass;
+		velocity = velocity + timestep * accel;
+	}
 }
 
 void Point::integrateWithMidpoint(float timestep, Point* midpoint)
 {
-	position = position + timestep * (midpoint->getVelocity());
+	if (!fixed)
+	{
+		position = position + timestep * (midpoint->getVelocity());
 
-	Vec3 accel = midpoint->getForce() / mass;
-	velocity = velocity + timestep * accel;
+		Vec3 accel = midpoint->getForce() / mass;
+		velocity = velocity + timestep * accel;
+	}
 }

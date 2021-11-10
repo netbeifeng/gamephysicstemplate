@@ -65,8 +65,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		m0 = 10, m1 = 10;
 
 		// The point objects:
-		pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0);
-		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1);
+		pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false);
+		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false);
 
 		// The spring object:
 		s = Spring(40, 1, 0, 1);
@@ -95,14 +95,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			for (double j = 0; j < width; j++)
 			{
 				p0 = Vec3(-0.5 + j * stepSize, 0.5 - i * stepSize, i * stepSize/10);
-				if (i == 0 && j == 0)
-				{
-					v0 = Vec3(0, 1, 0);
-				}
-				else {
-					v0 = Vec3(0, 0, 0);
-				}
-				points.push_back(new Point(p0, v0, Vec3(0,0,0), 10));
+				points.push_back(new Point(p0, v0, Vec3(0,0,0), 10, i == 0 && j == 0));
 			}
 		}
 
@@ -148,8 +141,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			// Reset scene
 			for (auto p : points) { delete p; }
 			points.clear();
-			pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0);
-			pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1);
+			pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false);
+			pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false);
 			points.push_back(pt0);
 			points.push_back(pt1);
 
