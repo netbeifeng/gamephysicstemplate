@@ -1,9 +1,10 @@
 #include "MassPoint.h"
 
-Point::Point(Vec3 p, Vec3 v, float m)
+Point::Point(Vec3 p, Vec3 v, Vec3 f, float m)
 {
 	position = p;
 	velocity = v;
+	force = f;
 	mass = m;
 }
 
@@ -20,5 +21,5 @@ Point* Point::applyForce(Vec3 f, float timestep)
 	Vec3 accel = f / mass;
 	Vec3 vel = velocity + timestep * accel;
 	Vec3 pos = position + timestep * velocity;
-	return new Point(pos, vel, mass);
+	return new Point(pos, vel, force, mass);
 }

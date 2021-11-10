@@ -65,8 +65,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		m0 = 10, m1 = 10;
 
 		// The point objects:
-		pt0 = new Point(p0, v0, m0);
-		pt1 = new Point(p1, v1, m1);
+		pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0);
+		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1);
 
 		// The spring object:
 		s = Spring(40, 1, pt0, pt1);
