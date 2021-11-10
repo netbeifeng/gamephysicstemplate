@@ -171,7 +171,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 		case 3:
 		{
-			cout << "Demo 4 (Euler) selected.\n\n";
+			cout << "Demo 4 (Euler) selected.\n";
+			cout << "(0.0116 is a good timestep to see the difference in stability.)\n\n";
 		}
 		break;
 
@@ -185,7 +186,28 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	}
 }
 
-void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {}
+void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
+	if (m_iTestCase == 3 || m_iTestCase == 4)
+	{
+		// Apply the mouse deltas to point[0] (move along cameras view plane)
+		Point2D mouseDiff;
+		mouseDiff.x = m_trackmouse.x - m_oldtrackmouse.x;
+		mouseDiff.y = m_trackmouse.y - m_oldtrackmouse.y;
+		if (mouseDiff.x != 0 || mouseDiff.y != 0)
+		{
+			Mat4 worldViewInv = Mat4(DUC->g_camera.GetWorldMatrix() * DUC->g_camera.GetViewMatrix());
+			worldViewInv = worldViewInv.inverse();
+			Vec3 inputView = Vec3((float)mouseDiff.x, (float)-mouseDiff.y, 0);
+			Vec3 inputWorld = worldViewInv.transformVectorNormal(inputView);
+			// find a proper scale!
+			float inputScale = 0.000015f;
+			inputWorld = inputWorld * inputScale;
+			Vec3 curpos = points[0]->getPosition();
+			points[0]->setPosition(curpos + inputWorld);
+		}
+	}
+
+}
 
 void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 {
