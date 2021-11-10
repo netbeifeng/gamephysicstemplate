@@ -72,6 +72,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		s = Spring(40, 1, pt0, pt1);
 
 		// Push points onto the attribute
+		for (auto p : points) { delete p; }
 		points.clear();
 		points.push_back(pt0);
 		points.push_back(pt1);
@@ -106,6 +107,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			makeMidpointStep(0.1);
 			cout << "position p1: " << springs[0].getP1()->getPosition() << "\n";
 			cout << "position p2: " << springs[0].getP2()->getPosition() << "\n\n";
+
+			delete pt0, pt1;
 		}
 		break;
 
