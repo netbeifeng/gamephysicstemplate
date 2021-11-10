@@ -6,7 +6,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 {
 	setMass(10);
 	setStiffness(100);
-	setDampingFactor(0);
+	setDampingFactor(0.8);
 	setIntegrator(0);
 
 	m_mouse = { 0,0 };
@@ -69,7 +69,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false);
 
 		// The spring object:
-		s = Spring(40, 1, 0, 1);
+		s = Spring(40, 1, 0, 0, 1);
 
 		// Push points onto the attribute
 		for (auto p : points) { delete p; }
@@ -105,7 +105,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		{
 			for (int j = 0; j < width - 1; j++)
 			{
-				s = Spring(m_fStiffness, restLen, i * width + j, i * width + j + 1);
+				s = Spring(m_fStiffness, restLen, m_fDamping, i * width + j, i * width + j + 1);
 				springs.push_back(s);
 			}
 		}
@@ -114,7 +114,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		{
 			for (int i = 0; i < height - 1; i++)
 			{
-				s = Spring(m_fStiffness, restLen, i * width + j, (i + 1) * width + j);
+				s = Spring(m_fStiffness, restLen, m_fDamping, i * width + j, (i + 1) * width + j);
 				springs.push_back(s);
 			}
 		}

@@ -1,9 +1,10 @@
 #include "Spring.h"
 
-Spring::Spring(float k, float L, int pt1, int pt2)
+Spring::Spring(float k, float L, float d, int pt1, int pt2)
 {
 	stiffness = k;
 	restLength = L;
+	dampingFactor = d;
 	p1 = pt1;
 	p2 = pt2;
 }
@@ -31,4 +32,10 @@ void Spring::applyElasticForceToPoints(std::vector<Point*> points)
 	Vec3 f2 = -f1;
 	pt1->addForce(f1);
 	pt2->addForce(f2);
+
+	// Damping
+	Vec3 dampingForceP1 = dampingFactor * pt1->getVelocity();
+	Vec3 dampingForceP2 = dampingFactor * pt2->getVelocity();
+	pt1->addForce(-dampingForceP1);
+	pt2->addForce(-dampingForceP2);
 }
