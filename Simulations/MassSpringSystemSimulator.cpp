@@ -37,7 +37,7 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	DUC->beginLine();
 	for each (Spring s in springs)
 	{
-		DUC->drawLine(s.getP1().getPosition(), Vec3(1, 0, 0), s.getP2().getPosition(), Vec3(0, 1, 0));
+		DUC->drawLine(s.getP1()->getPosition(), Vec3(1, 0, 0), s.getP2()->getPosition(), Vec3(0, 1, 0));
 	}
 	DUC->endLine();
 }
@@ -47,7 +47,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	m_iTestCase = testCase;
 
 	// For Demos 1-3
-	Point pt0, pt1;
+	Point* pt0, *pt1;
 	Spring s;
 	float m0, m1;
 	Vec3 p0, p1, v0, v1;
@@ -65,8 +65,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		m0 = 10, m1 = 10;
 
 		// The point objects:
-		pt0 = Point(p0, v0, m0);
-		pt1 = Point(p1, v1, m1);
+		pt0 = new Point(p0, v0, m0);
+		pt1 = new Point(p1, v1, m1);
 
 		// The spring object:
 		s = Spring(40, 1, pt0, pt1);
@@ -93,8 +93,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 			cout << "Euler: \n";
 			makeEulerStep(0.1);
-			cout << "position p1: " << springs[0].getP1().getPosition() << "\n";
-			cout << "position p2: " << springs[0].getP2().getPosition() << "\n\n";
+			cout << "position p1: " << springs[0].getP1()->getPosition() << "\n";
+			cout << "position p2: " << springs[0].getP2()->getPosition() << "\n\n";
 
 
 			// Reset scene
@@ -104,8 +104,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 			cout << "Midpoint: \n";
 			makeMidpointStep(0.1);
-			cout << "position p1: " << springs[0].getP1().getPosition() << "\n";
-			cout << "position p2: " << springs[0].getP2().getPosition() << "\n\n";
+			cout << "position p1: " << springs[0].getP1()->getPosition() << "\n";
+			cout << "position p2: " << springs[0].getP2()->getPosition() << "\n\n";
 		}
 		break;
 
@@ -151,8 +151,8 @@ void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
 
 void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	Spring midPointSpring = springs[0].makeEulerStep(timeStep/2);
-	points[0].setVelocity(midPointSpring.getP1().getVelocity());
-	points[1].setVelocity(midPointSpring.getP2().getVelocity());
+	points[0]->setVelocity(midPointSpring.getP1()->getVelocity());
+	points[1]->setVelocity(midPointSpring.getP2()->getVelocity());
 	springs[0] = Spring(springs[0].getStiffness(), springs[0].getRestLength(), points[0], points[1]);
 	springs[0] = springs[0].makeEulerStep(timeStep);
 	points[0] = springs[0].getP1();

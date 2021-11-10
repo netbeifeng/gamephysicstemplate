@@ -56,7 +56,7 @@ private:
 	int m_iIntegrator;
 
 	// Additional Data Attributes
-	vector<Point> points;
+	vector<Point*> points;
 	vector<Spring> springs;
 
 	// UI Attributes
