@@ -17,7 +17,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3,Demo 4";
+	return "Demo 1,Demo 2,Demo 3,Demo 4 (Euler),Demo 4 (Midpoint)";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -82,7 +82,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 		break;
 
-	case 3:
+	case 3: case 4:
 	{
 		double restLen = 0.1;
 		double stepSize = 0.1;
@@ -178,7 +178,13 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 		case 3:
 		{
-			cout << "Demo 4 selected.\n\n";
+			cout << "Demo 4 (Euler) selected.\n\n";
+		}
+		break;
+
+		case 4:
+		{
+			cout << "Demo 4 (Midpoint) selected.\n\n";
 		}
 		break;
 		default:
@@ -200,6 +206,9 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 		break;
 	case 3:
 		makeEulerStep(timeStep);
+		break;
+	case 4:
+		makeMidpointStep(timeStep);
 		break;
 	default:
 		break;
@@ -232,7 +241,7 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	for (size_t i = 0; i < points.size(); i++)
 	{
 		points[i]->clearForce();
-		if (m_iTestCase == 3) {
+		if (m_iTestCase == 4) {
 			points[i]->addAcceleration(Vec3(0, -9, 0));
 		}
 	}
@@ -253,7 +262,7 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	for (size_t i = 0; i < midpoints.size(); i++)
 	{
 		midpoints[i]->clearForce();
-		if (m_iTestCase == 3) {
+		if (m_iTestCase == 4) {
 			midpoints[i]->addAcceleration(Vec3(0, -9, 0));
 		}
 	}
