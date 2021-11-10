@@ -137,8 +137,9 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			makeEulerStep(0.1);
 			cout << "position p1: " << springs[0].getP1(points)->getPosition() << "\n";
 			cout << "position p2: " << springs[0].getP2(points)->getPosition() << "\n";
+			cout << "velocity p1: " << springs[0].getP1(points)->getVelocity() << "\n";
+			cout << "velocity p2: " << springs[0].getP2(points)->getVelocity() << "\n";
 			cout << "\n";
-
 
 			// Reset scene
 			for (auto p : points) { delete p; }
