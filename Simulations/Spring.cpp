@@ -28,7 +28,7 @@ Spring Spring::makeEulerStep(float timestep)
 {
 	Vec3 f1 = getHookeForce();
 	Vec3 f2 = -f1;
-	Point q1 = p1.applyForce(f1, timestep);
-	Point q2 = p2.applyForce(f2, timestep);
+	Point q1 = *(p1.applyForce(f1, timestep));
+	Point q2 = *(p2.applyForce(f2, timestep));
 	return Spring(stiffness, restLength, q1, q2);
 }

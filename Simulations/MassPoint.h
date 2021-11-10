@@ -10,7 +10,7 @@ public:
 	void setVelocity(Vec3);
 	Vec3 getPosition();
 	Vec3 getVelocity();
-	Point applyForce(Vec3,float);
+	Point* applyForce(Vec3,float);
 
 private:
 	Vec3 position;

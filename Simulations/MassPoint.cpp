@@ -15,10 +15,10 @@ Vec3 Point::getVelocity() { return velocity; }
 /*
 Returns a new point object with the old velocity applied to the position and the force f applied to the velocity after an Euler timestep. The current object remains unchanged.
 **/
-Point Point::applyForce(Vec3 f, float timestep)
+Point* Point::applyForce(Vec3 f, float timestep)
 {
 	Vec3 accel = f / mass;
 	Vec3 vel = velocity + timestep * accel;
 	Vec3 pos = position + timestep * velocity;
-	return Point(pos, vel, mass);
+	return new Point(pos, vel, mass);
 }
