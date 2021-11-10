@@ -37,7 +37,7 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	DUC->beginLine();
 	for each (Spring s in springs)
 	{
-		DUC->drawLine(s.getP1()->getPosition(), Vec3(1, 0, 0), s.getP2()->getPosition(), Vec3(0, 1, 0));
+		DUC->drawLine(s.getP1(points)->getPosition(), Vec3(1, 0, 0), s.getP2(points)->getPosition(), Vec3(0, 1, 0));
 	}
 	DUC->endLine();
 }
@@ -69,7 +69,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1);
 
 		// The spring object:
-		s = Spring(40, 1, pt0, pt1);
+		s = Spring(40, 1, 0, 1);
 
 		// Push points onto the attribute
 		for (auto p : points) { delete p; }
@@ -94,21 +94,27 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 			cout << "Euler: \n";
 			makeEulerStep(0.1);
-			cout << "position p1: " << springs[0].getP1()->getPosition() << "\n";
-			cout << "position p2: " << springs[0].getP2()->getPosition() << "\n\n";
+			cout << "position p1: " << springs[0].getP1(points)->getPosition() << "\n";
+			cout << "position p2: " << springs[0].getP2(points)->getPosition() << "\n";
+			cout << "\n";
 
 
 			// Reset scene
-			points[0] = pt0;
-			points[1] = pt1;
-			springs[0] = s;
+			for (auto p : points) { delete p; }
+			points.clear();
+			pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0);
+			pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1);
+			points.push_back(pt0);
+			points.push_back(pt1);
 
 			cout << "Midpoint: \n";
 			makeMidpointStep(0.1);
-			cout << "position p1: " << springs[0].getP1()->getPosition() << "\n";
-			cout << "position p2: " << springs[0].getP2()->getPosition() << "\n\n";
+			cout << "position p1: " << springs[0].getP1(points)->getPosition() << "\n";
+			cout << "position p2: " << springs[0].getP2(points)->getPosition() << "\n";
+			cout << "velocity p1: " << springs[0].getP1(points)->getVelocity() << "\n";
+			cout << "velocity p2: " << springs[0].getP2(points)->getVelocity() << "\n";
+			cout << "\n";
 
-			delete pt0, pt1;
 		}
 		break;
 
@@ -147,19 +153,67 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 }
 
 void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
-	springs[0] = springs[0].makeEulerStep(timeStep);
-	points[0] = springs[0].getP1();
-	points[1] = springs[0].getP2();
+	// Forces
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		points[i]->clearForce();
+		if (m_iTestCase == 3) {
+			points[i]->addAcceleration(Vec3(0, -9, 0));
+		}
+	}
+	for (size_t i = 0; i < springs.size(); i++)
+	{
+		springs[i].applyElasticForceToPoints(points);
+	}
+
+	// Integration
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		points[i]->integrate(timeStep);
+	}
 }
 
 void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
-	Spring midPointSpring = springs[0].makeEulerStep(timeStep/2);
-	points[0]->setVelocity(midPointSpring.getP1()->getVelocity());
-	points[1]->setVelocity(midPointSpring.getP2()->getVelocity());
-	springs[0] = Spring(springs[0].getStiffness(), springs[0].getRestLength(), points[0], points[1]);
-	springs[0] = springs[0].makeEulerStep(timeStep);
-	points[0] = springs[0].getP1();
-	points[1] = springs[0].getP2();
+	// Forces at current points
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		points[i]->clearForce();
+		if (m_iTestCase == 3) {
+			points[i]->addAcceleration(Vec3(0, -9, 0));
+		}
+	}
+	for (size_t i = 0; i < springs.size(); i++)
+	{
+		springs[i].applyElasticForceToPoints(points);
+	}
+
+	// Integration to midpoint
+	vector<Point*> midpoints;
+	midpoints.clear();
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		midpoints.push_back(points[i]->integrated(timeStep / 2));
+	}
+
+	// Forces at midpoint
+	for (size_t i = 0; i < midpoints.size(); i++)
+	{
+		midpoints[i]->clearForce();
+		if (m_iTestCase == 3) {
+			midpoints[i]->addAcceleration(Vec3(0, -9, 0));
+		}
+	}
+	for (size_t i = 0; i < springs.size(); i++)
+	{
+		springs[i].applyElasticForceToPoints(midpoints);
+	}
+
+	// Calculate result
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		points[i]->integrateWithMidpoint(timeStep, midpoints[i]);
+	}
+	for (auto p : midpoints) { delete p; }
 }
 
 void MassSpringSystemSimulator::onClick(int x, int y)

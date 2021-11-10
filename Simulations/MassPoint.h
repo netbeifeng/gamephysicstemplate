@@ -10,7 +10,14 @@ public:
 	void setVelocity(Vec3);
 	Vec3 getPosition();
 	Vec3 getVelocity();
-	Point* applyForce(Vec3,float);
+	Vec3 getForce();
+
+	void clearForce();
+	void addForce(Vec3 f);
+	void addAcceleration(Vec3 a);
+	Point* integrated(float);
+	void integrate(float);
+	void integrateWithMidpoint(float, Point*);
 
 private:
 	Vec3 position;

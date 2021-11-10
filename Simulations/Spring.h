@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "util/vectorbase.h"
 using namespace GamePhysics;
 #include "MassPoint.h"
@@ -7,19 +9,19 @@ using namespace GamePhysics;
 class Spring
 {
 public:
-	Spring(float k = 0, float L = 0, Point* p1 = 0, Point* p2= 0);
+	Spring(float k = 0, float L = 0, int p1 = 0, int p2= 0);
 
+	Point* getP1(std::vector<Point*> points);
+	Point* getP2(std::vector<Point*> points);
 	float getRestLength();
 	float getStiffness();
-	Point* getP1();
-	Point* getP2();
 
-	Vec3 getHookeForce();
-	Spring makeEulerStep(float);
+	Vec3 getHookeForce(std::vector<Point*>);
+	void applyElasticForceToPoints(std::vector<Point*>);
 
 private:
+	int p1;
+	int p2;
 	float restLength;
 	float stiffness;
-	Point* p1;
-	Point* p2;
 };
