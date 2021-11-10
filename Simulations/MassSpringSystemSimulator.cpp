@@ -5,7 +5,7 @@
 MassSpringSystemSimulator::MassSpringSystemSimulator()
 {
 	setMass(10);
-	setStiffness(40);
+	setStiffness(100);
 	setDampingFactor(0);
 	setIntegrator(0);
 
@@ -52,7 +52,6 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	float m0, m1;
 	Vec3 p0, p1, v0, v1;
 
-	float restLen = 0.3;
 	// ** Setup Scene ** //
 	switch (testCase)
 	{
@@ -84,14 +83,19 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		break;
 
 	case 3:
+	{
+		double restLen = 0.1;
+		double stepSize = 0.1;
+		int width = 8; int height = 8;
+
 		for (auto p : points) { delete p; }
 		points.clear();
-		for (int i = 0; i < 4; i++)
+		for (double i = 0; i < height; i++)
 		{
-			for (int j = 0; j < 3; j++)
+			for (double j = 0; j < width; j++)
 			{
-				p0 = Vec3(-0.5 + j*0.3, 0.5 - i*0.3, 0);
-				if ((i == 0) && (j == 0 || j == 2))
+				p0 = Vec3(-0.5 + j * stepSize, 0.5 - i * stepSize, 0);
+				if (i == 0 && j == 0)
 				{
 					v0 = Vec3(0, 1, 0);
 				}
@@ -104,25 +108,25 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 		springs.clear();
 		// Horizontal connections
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < height; i++)
 		{
-			s = Spring(40, restLen, i * 3, i * 3 + 1);
-			springs.push_back(s);
-			s = Spring(40, restLen, i * 3 +1, i * 3 + 2);
-			springs.push_back(s);
+			for (int j = 0; j < width - 1; j++)
+			{
+				s = Spring(m_fStiffness, restLen, i * width + j, i * width + j + 1);
+				springs.push_back(s);
+			}
 		}
 		// Vertical connections
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < width; j++)
 		{
-			s = Spring(40, restLen, 0+j, 3 + j);
-			springs.push_back(s);
-			s = Spring(40, restLen, 3 + j, 6 + j);
-			springs.push_back(s);
-			s = Spring(40, restLen, 6 + j, 9 + j);
-			springs.push_back(s);
+			for (int i = 0; i < height - 1; i++)
+			{
+				s = Spring(m_fStiffness, restLen, i * width + j, (i + 1) * width + j);
+				springs.push_back(s);
+			}
 		}
 		break;
-
+	}
 	default:
 		break;
 	}
