@@ -42,11 +42,16 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	DUC->endLine();
 }
 
+/*
+Reacts to change in test case (e.g. the drop-down menu, or when "reset scene" is pressed).
+- Sets up scene, and
+- prints out a short message to standard output.
+*/
 void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 {
+	// Pass argument to the attribute.
 	m_iTestCase = testCase;
 
-	// For Demos 1-3
 	Point* pt0, *pt1;
 	Spring s;
 	float m0, m1;
@@ -57,7 +62,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	{
 	// Setup for Demos 1-3 (Table 1.1)
 	case 0: case 1: case 2:
-		// Points
+		// * Points * //
 		p0 = Vec3(0, 0, 0);
 		v0 = Vec3(-1, 0, 0);
 		p1 = Vec3(0, 2, 0);
@@ -68,37 +73,54 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false);
 		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false);
 
-		// The spring object:
-		s = Spring(40, 1, 0, 0, 1);
-
 		// Push points onto the attribute
 		for (auto p : points) { delete p; }
 		points.clear();
 		points.push_back(pt0);
 		points.push_back(pt1);
 
+		// * Spring * //
+		// The spring object:
+		s = Spring(40, 1, 0, 0, 1);
+
+		// Push points onto the attribute
 		springs.clear();
 		springs.push_back(s);
 
 		break;
 
+	// Setup for Demo 4
 	case 3: case 4:
 	{
+		// Construct a "sheet" of points connected with springs,
+		// with a small upward velocity
+		// and two points at the top corners being fixed.
+
+		// Rest length of the springs
 		double restLen = 0.1;
+		// Initial length of the springs
 		double stepSize = 0.1;
+		// Number of points: width*height
 		int width = 8; int height = 8;
 
+		// * Points * //
 		for (auto p : points) { delete p; }
 		points.clear();
 		for (double i = 0; i < height; i++)
 		{
 			for (double j = 0; j < width; j++)
 			{
+				// i running from from top=0.5 to bottom,
+				// j running from left=-0.5 to right,
+				// with a slight forward tilt of stepSize/10 per row
 				p0 = Vec3(-0.5 + j * stepSize, 0.5 - i * stepSize, i * stepSize/10);
+				// Push point onto the attribute, with a small upward velocity no force;
+				// fix the top corners.
 				points.push_back(new Point(p0, Vec3(0,1,0), Vec3(0,0,0), m_fMass, i == 0 && (j == 0 || j+1==width)));
 			}
 		}
 
+		// * Springs * //
 		springs.clear();
 		// Horizontal connections
 		for (int i = 0; i < height; i++)
@@ -123,7 +145,9 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	default:
 		break;
 	}
+	// END Setup Scene //
 
+	// ** Write out to std output ** //
 	switch (testCase)
 	{
 		case 0:
@@ -158,30 +182,22 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		break;
 
 		case 1:
-		{
 			cout << "Demo 2 selected.\n\n";
-		}
-		break;
+			break;
 
 		case 2:
-		{
 			cout << "Demo 3 selected.\n\n";
-		}
-		break;
+			break;
 
 		case 3:
-		{
 			cout << "Demo 4 (Euler) selected.\n";
-		}
-		break;
+			break;
 
 		case 4:
-		{
 			cout << "Demo 4 (Midpoint) selected.\n\n";
-		}
-		break;
+			break;
 		default:
-		break;
+			break;
 	}
 }
 
