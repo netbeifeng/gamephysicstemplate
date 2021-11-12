@@ -5,7 +5,7 @@
 MassSpringSystemSimulator::MassSpringSystemSimulator()
 {
 	setMass(10);
-	setStiffness(100);
+	setStiffness(10000);
 	setDampingFactor(0.8);
 	setIntegrator(0);
 
