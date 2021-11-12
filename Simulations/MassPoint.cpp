@@ -38,7 +38,7 @@ Point* Point::integrated(float timestep)
 	Vec3 accel = force / mass;
 	Vec3 vel = velocity + timestep * accel;
 	Vec3 pos = position + timestep * velocity;
-	return new Point(position, vel, force, mass, fixed);
+	return new Point(position, vel, Vec3(0,0,0), mass, fixed);
 }
 
 void Point::integrate(float timestep)
@@ -50,6 +50,7 @@ void Point::integrate(float timestep)
 		Vec3 accel = force / mass;
 		velocity = velocity + timestep * accel;
 	}
+	clearForce();
 }
 
 void Point::integrateWithMidpoint(float timestep, Point* midpoint)
@@ -61,4 +62,5 @@ void Point::integrateWithMidpoint(float timestep, Point* midpoint)
 		Vec3 accel = midpoint->getForce() / mass;
 		velocity = velocity + timestep * accel;
 	}
+	clearForce();
 }

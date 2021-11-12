@@ -235,7 +235,7 @@ void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
 	// Forces
 	for (size_t i = 0; i < points.size(); i++)
 	{
-		points[i]->clearForce();
+		// Gravity
 		if (m_iTestCase == 3) {
 			points[i]->addAcceleration(Vec3(0, -9, 0));
 		}
@@ -256,7 +256,7 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	// Forces at current points
 	for (size_t i = 0; i < points.size(); i++)
 	{
-		points[i]->clearForce();
+		// Gravity
 		if (m_iTestCase == 4) {
 			points[i]->addAcceleration(Vec3(0, -9, 0));
 		}
@@ -277,7 +277,6 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	// Forces at midpoint
 	for (size_t i = 0; i < midpoints.size(); i++)
 	{
-		midpoints[i]->clearForce();
 		if (m_iTestCase == 4) {
 			midpoints[i]->addAcceleration(Vec3(0, -9, 0));
 		}
