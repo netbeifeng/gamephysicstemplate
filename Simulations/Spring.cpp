@@ -34,8 +34,8 @@ void Spring::applyElasticForceToPoints(std::vector<Point*> points)
 	pt2->addForce(f2);
 
 	// Damping
-	Vec3 dampingForceP1 = dampingFactor * pt1->getVelocity();
-	Vec3 dampingForceP2 = dampingFactor * pt2->getVelocity();
+	Vec3 dampingForceP1 = dampingFactor * pt1->getVelocity() * pt1->getMass();
+	Vec3 dampingForceP2 = dampingFactor * pt2->getVelocity() * pt2->getMass();
 	pt1->addForce(-dampingForceP1);
 	pt2->addForce(-dampingForceP2);
 }
