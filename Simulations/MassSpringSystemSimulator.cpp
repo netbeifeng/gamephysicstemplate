@@ -7,7 +7,6 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 	setMass(10);
 	setStiffness(10000);
 	setDampingFactor(0.8);
-	setIntegrator(0);
 
 	m_mouse = { 0,0 };
 	m_trackmouse = { 0,0 };
