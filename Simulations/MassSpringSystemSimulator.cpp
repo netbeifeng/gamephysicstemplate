@@ -172,7 +172,6 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		case 3:
 		{
 			cout << "Demo 4 (Euler) selected.\n";
-			cout << "(0.0116 is a good timestep to see the difference in stability.)\n\n";
 		}
 		break;
 
