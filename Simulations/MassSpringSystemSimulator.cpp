@@ -95,7 +95,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			for (double j = 0; j < width; j++)
 			{
 				p0 = Vec3(-0.5 + j * stepSize, 0.5 - i * stepSize, i * stepSize/10);
-				points.push_back(new Point(p0, v0, Vec3(0,0,0), 10, i == 0 && (j == 0 || j+1==width)));
+				points.push_back(new Point(p0, v0, Vec3(0,0,0), m_fMass, i == 0 && (j == 0 || j+1==width)));
 			}
 		}
 
