@@ -9,7 +9,7 @@ using namespace GamePhysics;
 class Spring
 {
 public:
-	Spring(float k = 0, float L = 0, float d = 0, int p1 = 0, int p2= 0);
+	Spring(float k = 0, float L = 0, float d = 0, size_t p1 = 0, size_t p2= 0);
 
 	Point* getP1(std::vector<Point*> points);
 	Point* getP2(std::vector<Point*> points);
@@ -20,8 +20,8 @@ public:
 	void applyElasticForceToPoints(std::vector<Point*>);
 
 private:
-	int p1;
-	int p2;
+	size_t p1;
+	size_t p2;
 	float restLength;
 	float stiffness;
 	float dampingFactor;

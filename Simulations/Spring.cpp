@@ -1,6 +1,6 @@
 #include "Spring.h"
 
-Spring::Spring(float k, float L, float d, int pt1, int pt2)
+Spring::Spring(float k, float L, float d, size_t pt1, size_t pt2)
 {
 	stiffness = k;
 	restLength = L;
