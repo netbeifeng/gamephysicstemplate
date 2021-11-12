@@ -1,0 +1,5 @@
+Simulations/Win32/Debug/*
+SimulationsRunner/Debug/*
+SimulatorTester/Win32/Debug/*
+Win32/Debug/*
+.vs/*
