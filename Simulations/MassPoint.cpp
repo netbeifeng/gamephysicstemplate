@@ -30,7 +30,7 @@ void Point::addForce(Vec3 f)
 void Point::addAcceleration(Vec3 a)
 {
 	if (!fixed)
-		force += a / mass;
+		force += a * mass;
 }
 
 Point* Point::integrated(float timestep)
