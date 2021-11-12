@@ -201,6 +201,10 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	}
 }
 
+/*
+In Demo 4, allow the top left corner to be moved.
+Based on the mouse movement during a click, add difference vector to the current position.
+*/
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
 	if (m_iTestCase == 3 || m_iTestCase == 4)
 	{
@@ -217,6 +221,7 @@ void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
 			// find a proper scale!
 			float inputScale = 0.000015f;
 			inputWorld = inputWorld * inputScale;
+			// Apply difference vector
 			Vec3 curpos = points[0]->getPosition();
 			points[0]->setPosition(curpos + inputWorld);
 		}

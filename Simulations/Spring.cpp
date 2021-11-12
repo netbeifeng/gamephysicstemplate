@@ -1,5 +1,8 @@
 #include "Spring.h"
 
+/*
+Constructs a spring, storing its endpoints through the index of the point in a vector lying outside the influence of this class.
+*/
 Spring::Spring(float k, float L, float d, size_t pt1, size_t pt2)
 {
 	stiffness = k;
@@ -18,9 +21,12 @@ Vec3 Spring::getHookeForce(std::vector<Point*> points)
 {
 	Point* pt1 = getP1(points);
 	Point* pt2 = getP2(points);
+
+	// Hooke's law:
 	Vec3 distVect = pt1->getPosition() - pt2->getPosition();
 	float currentLength = sqrt(distVect.squaredDistanceTo(Vec3(0, 0, 0)));
 	Vec3 force = stiffness * (restLength - currentLength) * distVect / currentLength;
+
 	return force;
 }
 

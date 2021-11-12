@@ -33,6 +33,11 @@ void Point::addAcceleration(Vec3 a)
 		force += a * mass;
 }
 
+/*
+Returns a new Point resulting from integrating the current Point, without modifying it.
+The same as applying integrate() to a clone of the current object.
+(Used e.g. in the midpoint method).
+*/
 Point* Point::integrated(float timestep)
 {
 	Vec3 accel = force / mass;
@@ -41,6 +46,9 @@ Point* Point::integrated(float timestep)
 	return new Point(position, vel, Vec3(0,0,0), mass, fixed);
 }
 
+/*
+Applies integration on position and velocity, both based on the old values, and clears force.
+*/
 void Point::integrate(float timestep)
 {
 	if (!fixed)
@@ -53,6 +61,11 @@ void Point::integrate(float timestep)
 	clearForce();
 }
 
+/*
+Applies midpoint integration, with the supplied midpoint.
+Position and velocity are updated based on the old values and the changes at the midpoint.
+Clears force.
+*/
 void Point::integrateWithMidpoint(float timestep, Point* midpoint)
 {
 	if (!fixed)
