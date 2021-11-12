@@ -12,6 +12,7 @@ public:
 	Vec3 getPosition();
 	Vec3 getVelocity();
 	Vec3 getForce();
+	float getMass() { return mass; }
 
 	void clearForce();
 	void addForce(Vec3 f);
