@@ -235,10 +235,12 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 		makeMidpointStep(0.005);
 		break;
 	case 3:
+		addGravity(Vec3(0, -9, 0));
 		makeEulerStep(timeStep);
 		enforceFloorBoundary();
 		break;
 	case 4:
+		addGravity(Vec3(0, -9, 0));
 		makeMidpointStep(timeStep);
 		enforceFloorBoundary();
 		break;
@@ -256,14 +258,6 @@ void MassSpringSystemSimulator::addGravity(Vec3 g)
 }
 
 void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
-	// Forces
-	for (size_t i = 0; i < points.size(); i++)
-	{
-		// Gravity
-		if (m_iTestCase == 3) {
-			points[i]->addAcceleration(Vec3(0, -9, 0));
-		}
-	}
 	for (size_t i = 0; i < springs.size(); i++)
 	{
 		springs[i].applyElasticForceToPoints(points);
@@ -277,14 +271,6 @@ void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
 }
 
 void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
-	// Forces at current points
-	for (size_t i = 0; i < points.size(); i++)
-	{
-		// Gravity
-		if (m_iTestCase == 4) {
-			points[i]->addAcceleration(Vec3(0, -9, 0));
-		}
-	}
 	for (size_t i = 0; i < springs.size(); i++)
 	{
 		springs[i].applyElasticForceToPoints(points);
