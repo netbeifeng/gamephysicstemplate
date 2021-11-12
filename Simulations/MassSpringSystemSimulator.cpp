@@ -247,6 +247,14 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	}
 }
 
+void MassSpringSystemSimulator::addGravity(Vec3 g)
+{
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		points[i]->addAcceleration(g);
+	}
+}
+
 void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
 	// Forces
 	for (size_t i = 0; i < points.size(); i++)
