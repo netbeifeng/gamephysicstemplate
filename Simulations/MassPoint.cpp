@@ -77,3 +77,17 @@ void Point::integrateWithMidpoint(float timestep, Point* midpoint)
 	}
 	clearForce();
 }
+
+void Point::integrateLeapFrog(float timestep)
+{
+	// Assuming that the velocity is half a step ahead.
+	if (!fixed)
+	{
+		// Normal Euler for velocity
+		Vec3 accel = force / mass;
+		velocity = velocity + timestep * accel;
+		// Use updated velocity for the position
+		position = position + timestep * velocity;
+	}
+	clearForce();
+}

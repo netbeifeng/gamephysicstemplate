@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3,Demo 4 (Euler),Demo 4 (Midpoint)";
+	return "Demo 1,Demo 2,Demo 3,Demo 4 (Euler),Demo 4 (Midpoint),Demo 5";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -88,8 +88,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 		break;
 
-	// Setup for Demo 4
-	case 3: case 4:
+	// Setup for Demo 4, 5
+	case 3: case 4: case 5:
 	{
 		// Construct a "sheet" of points connected with springs,
 		// with a small upward velocity
@@ -195,17 +195,21 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		case 4:
 			cout << "Demo 4 (Midpoint) selected.\n\n";
 			break;
+
+		case 5:
+			cout << "Demo 5 selected.\n\n";
+			break;
 		default:
 			break;
 	}
 }
 
 /*
-In Demo 4, allow the top left corner to be moved.
+In Demo 4 and 5, allow the top left corner to be moved.
 Based on the mouse movement during a click, add difference vector to the current position.
 */
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
-	if (m_iTestCase == 3 || m_iTestCase == 4)
+	if (m_iTestCase >= 3 && m_iTestCase <= 5)
 	{
 		// Apply the mouse deltas to point[0] (move along cameras view plane)
 		Point2D mouseDiff;
@@ -246,6 +250,11 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	case 4:
 		addGravity(Vec3(0, -9, 0));
 		makeMidpointStep(timeStep);
+		enforceFloorBoundary();
+		break;
+	case 5:
+		addGravity(Vec3(0, -9, 0));
+		makeLeapFrogStep(timeStep);
 		enforceFloorBoundary();
 		break;
 	default:
@@ -291,7 +300,7 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	// Forces at midpoint
 	for (size_t i = 0; i < midpoints.size(); i++)
 	{
-		if (m_iTestCase == 4) {
+		if (m_iTestCase == 4 || m_iTestCase == 5) {
 			midpoints[i]->addAcceleration(Vec3(0, -9, 0));
 		}
 	}
@@ -306,6 +315,20 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 		points[i]->integrateWithMidpoint(timeStep, midpoints[i]);
 	}
 	for (auto p : midpoints) { delete p; }
+}
+
+void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep)
+{
+	for (size_t i = 0; i < springs.size(); i++)
+	{
+		springs[i].applyElasticForceToPoints(points);
+	}
+
+	// Integration
+	for (size_t i = 0; i < points.size(); i++)
+	{
+		points[i]->integrateLeapFrog(timeStep);
+	}
 }
 
 void MassSpringSystemSimulator::enforceFloorBoundary()

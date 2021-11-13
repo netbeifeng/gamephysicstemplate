@@ -42,6 +42,7 @@ public:
 	// Additional Functions
 	void makeEulerStep(float);
 	void makeMidpointStep(float);
+	void makeLeapFrogStep(float);
 	void enforceFloorBoundary();
 	void addGravity(Vec3);
 

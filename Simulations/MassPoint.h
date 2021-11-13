@@ -20,6 +20,7 @@ public:
 	Point* integrated(float);
 	void integrate(float);
 	void integrateWithMidpoint(float, Point*);
+	void integrateLeapFrog(float);
 
 private:
 	Vec3 position;
