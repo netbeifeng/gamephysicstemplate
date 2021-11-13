@@ -43,7 +43,7 @@ Point* Point::integrated(float timestep)
 	Vec3 accel = force / mass;
 	Vec3 vel = velocity + timestep * accel;
 	Vec3 pos = position + timestep * velocity;
-	return new Point(position, vel, Vec3(0,0,0), mass, fixed);
+	return new Point(pos, vel, Vec3(0,0,0), mass, fixed);
 }
 
 /*
