@@ -248,7 +248,7 @@ void CALLBACK OnFrameMove( double dTime, float fElapsedTime, void* pUserContext 
 			g_pDUC->g_pTweakBar = nullptr;
 		}
 		initTweakBar();
-		g_pSimulator->notifyCaseChanged(g_iTestCase);
+		g_pSimulator->notifyCaseChanged(g_iTestCase, g_fTimestep);
 		g_pSimulator->initUI(g_pDUC);
 		g_iPreTestCase = g_iTestCase;
 	}

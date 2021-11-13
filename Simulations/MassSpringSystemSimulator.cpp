@@ -46,7 +46,7 @@ Reacts to change in test case (e.g. the drop-down menu, or when "reset scene" is
 - Sets up scene, and
 - prints out a short message to standard output.
 */
-void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
+void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 {
 	// Pass argument to the attribute.
 	m_iTestCase = testCase;
@@ -147,6 +147,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	// END Setup Scene //
 
 	// ** Write out to std output ** //
+	// * For Demo 5 (leap-frog), initialize
 	switch (testCase)
 	{
 		case 0:
@@ -197,7 +198,13 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			break;
 
 		case 5:
-			cout << "Demo 5 selected.\n\n";
+			cout << "Demo 5 selected.\n";
+			cout << "Initialized leap-frog assuming a timestep of: " << timestep << ".\n\n";
+			// Initialize velocities
+			applyForcesToCurrentPoints(Vec3(0, -9, 0));
+			for (Point* p : points) {
+				p->initializeLeapFrog(timestep);
+			}
 			break;
 		default:
 			break;

@@ -21,7 +21,7 @@ public:
 	void initUI(DrawingUtilitiesClass * DUC);
 	void reset();
 	void drawFrame(ID3D11DeviceContext* pd3dImmediateContext);
-	void notifyCaseChanged(int testCase);
+	void notifyCaseChanged(int testCase, float timestep);
 	void externalForcesCalculations(float timeElapsed);
 	void simulateTimestep(float timeStep);
 	void onClick(int x, int y);
