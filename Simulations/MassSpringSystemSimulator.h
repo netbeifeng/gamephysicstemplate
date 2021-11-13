@@ -8,6 +8,8 @@
 #define MIDPOINT 2
 // Do Not Change
 
+#include "MassPoint.h"
+#include "Spring.h"
 
 class MassSpringSystemSimulator:public Simulator{
 public:
@@ -37,6 +39,12 @@ public:
 	Vec3 getVelocityOfMassPoint(int index);
 	void applyExternalForce(Vec3 force);
 	
+	void addGravity(Vec3 g);
+	void enforceFloorBoundary();
+
+	void makeEulerStep(float step);
+	void makeMidpointStep(float step);
+
 	// Do Not Change
 	void setIntegrator(int integrator) {
 		m_iIntegrator = integrator;
@@ -48,6 +56,9 @@ private:
 	float m_fStiffness;
 	float m_fDamping;
 	int m_iIntegrator;
+
+	vector<MassPoint*> m_points;
+	vector<Spring> m_springs;
 
 	// UI Attributes
 	Vec3 m_externalForce;
