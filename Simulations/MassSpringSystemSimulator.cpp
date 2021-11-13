@@ -82,13 +82,13 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 		// The spring object:
 		s = Spring(40, 1, 0, 0, 1);
 
-		// Push points onto the attribute
+		// Push springs onto the attribute
 		springs.clear();
 		springs.push_back(s);
 
 		break;
 
-	// Setup for Demo 4, 5
+	// Setup for Demos 4 and 5
 	case 3: case 4: case 5:
 	{
 		// Construct a "sheet" of points connected with springs,
@@ -113,7 +113,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 				// j running from left=-0.5 to right,
 				// with a slight forward tilt of stepSize/10 per row
 				p0 = Vec3(-0.5 + j * stepSize, 0.5 - i * stepSize, i * stepSize/10);
-				// Push point onto the attribute, with a small upward velocity no force;
+				// Push point onto the attribute, with a small upward velocity, and no force;
 				// fix the top corners.
 				points.push_back(new Point(p0, Vec3(0,1,0), Vec3(0,0,0), m_fMass, i == 0 && (j == 0 || j+1==width)));
 			}
@@ -205,7 +205,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 }
 
 /*
-In Demo 4 and 5, allow the top left corner to be moved.
+In Demos 4 and 5, allow the top left corner to be moved.
 Based on the mouse movement during a click, add difference vector to the current position.
 */
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
