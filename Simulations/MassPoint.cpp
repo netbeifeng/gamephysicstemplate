@@ -81,6 +81,16 @@ void Point::integrateWithMidpoint(float timestep, Point* midpoint)
 	clearForce();
 }
 
+void Point::initializeLeapFrog(float timestep) {
+	if (!fixed)
+	{
+		// Only update velocity at half the step size
+		Vec3 accel = force / mass;
+		velocity = velocity + timestep / 2 * accel;
+	}
+	clearForce();
+}
+
 void Point::integrateLeapFrog(float timestep)
 {
 	// Assuming that the velocity is half a step ahead.
