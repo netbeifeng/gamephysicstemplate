@@ -213,7 +213,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 
 /*
 In Demos 4 and 5, allow the top left corner to be moved.
-Based on the mouse movement during a click, add difference vector to the current position.
+Based on the mouse movement during a click, add the resulting difference vector to the current position.
 */
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
 	if (m_iTestCase >= 3 && m_iTestCase <= 5)
@@ -285,9 +285,9 @@ void MassSpringSystemSimulator::makeEulerStep(float timeStep, Vec3 gravity)
 	applyForcesToCurrentPoints(gravity);
 
 	// Integration
-	for (size_t i = 0; i < points.size(); i++)
+	for (Point* p : points)
 	{
-		points[i]->integrate(timeStep);
+		p->integrate(timeStep);
 	}
 }
 
@@ -297,9 +297,9 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep, Vec3 gravity) {
 	// Integration to midpoint
 	vector<Point*> midpoints;
 	midpoints.clear();
-	for (size_t i = 0; i < points.size(); i++)
+	for (Point* p : points)
 	{
-		midpoints.push_back(points[i]->integrated(timeStep / 2));
+		midpoints.push_back(p->integrated(timeStep / 2));
 	}
 
 	// Forces at midpoint
@@ -327,9 +327,9 @@ void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep, Vec3 gravity)
 	applyForcesToCurrentPoints(gravity);
 
 	// Integration
-	for (size_t i = 0; i < points.size(); i++)
+	for (Point * p : points)
 	{
-		points[i]->integrateLeapFrog(timeStep);
+		p->integrateLeapFrog(timeStep);
 	}
 }
 
