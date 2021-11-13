@@ -154,7 +154,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			cout << "Demo 1 selected.\n\n";
 
 			cout << "Euler: \n";
-			makeEulerStep(0.1);
+			makeEulerStep(0.1, Vec3(0,0,0));
 			cout << "position p1: " << springs[0].getP1(points)->getPosition() << "\n";
 			cout << "position p2: " << springs[0].getP2(points)->getPosition() << "\n";
 			cout << "velocity p1: " << springs[0].getP1(points)->getVelocity() << "\n";
@@ -170,7 +170,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 			points.push_back(pt1);
 
 			cout << "Midpoint: \n";
-			makeMidpointStep(0.1);
+			makeMidpointStep(0.1, Vec3(0, 0, 0));
 			cout << "position p1: " << springs[0].getP1(points)->getPosition() << "\n";
 			cout << "position p2: " << springs[0].getP2(points)->getPosition() << "\n";
 			cout << "velocity p1: " << springs[0].getP1(points)->getVelocity() << "\n";
@@ -237,24 +237,21 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	switch (m_iTestCase)
 	{
 	case 1:
-		makeEulerStep(0.005);
+		makeEulerStep(0.005, Vec3(0, 0, 0));
 		break;
 	case 2:
-		makeMidpointStep(0.005);
+		makeMidpointStep(0.005, Vec3(0, 0, 0));
 		break;
 	case 3:
-		addGravity(Vec3(0, -9, 0));
-		makeEulerStep(timeStep);
+		makeEulerStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
 	case 4:
-		addGravity(Vec3(0, -9, 0));
-		makeMidpointStep(timeStep);
+		makeMidpointStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
 	case 5:
-		addGravity(Vec3(0, -9, 0));
-		makeLeapFrogStep(timeStep);
+		makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
 	default:
@@ -262,19 +259,23 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	}
 }
 
-void MassSpringSystemSimulator::addGravity(Vec3 g)
+void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)
 {
-	for (size_t i = 0; i < points.size(); i++)
+	// Gravity:
+	for (Point* p : points)
 	{
-		points[i]->addAcceleration(g);
+		p->addAcceleration(gravity);
+	}
+	// Internal forces:
+	for (Spring s : springs)
+	{
+		s.applyElasticForceToPoints(points);
 	}
 }
 
-void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
-	for (size_t i = 0; i < springs.size(); i++)
-	{
-		springs[i].applyElasticForceToPoints(points);
-	}
+void MassSpringSystemSimulator::makeEulerStep(float timeStep, Vec3 gravity)
+{
+	applyForcesToCurrentPoints(gravity);
 
 	// Integration
 	for (size_t i = 0; i < points.size(); i++)
@@ -283,11 +284,8 @@ void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
 	}
 }
 
-void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
-	for (size_t i = 0; i < springs.size(); i++)
-	{
-		springs[i].applyElasticForceToPoints(points);
-	}
+void MassSpringSystemSimulator::makeMidpointStep(float timeStep, Vec3 gravity) {
+	applyForcesToCurrentPoints(gravity);
 
 	// Integration to midpoint
 	vector<Point*> midpoints;
@@ -298,15 +296,15 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	}
 
 	// Forces at midpoint
-	for (size_t i = 0; i < midpoints.size(); i++)
+	// Gravity:
+	for (Point* p : midpoints)
 	{
-		if (m_iTestCase == 4 || m_iTestCase == 5) {
-			midpoints[i]->addAcceleration(Vec3(0, -9, 0));
-		}
+		p->addAcceleration(gravity);
 	}
-	for (size_t i = 0; i < springs.size(); i++)
+	// Internal forces:
+	for (Spring s : springs)
 	{
-		springs[i].applyElasticForceToPoints(midpoints);
+		s.applyElasticForceToPoints(midpoints);
 	}
 
 	// Calculate result
@@ -317,12 +315,9 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	for (auto p : midpoints) { delete p; }
 }
 
-void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep)
+void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep, Vec3 gravity)
 {
-	for (size_t i = 0; i < springs.size(); i++)
-	{
-		springs[i].applyElasticForceToPoints(points);
-	}
+	applyForcesToCurrentPoints(gravity);
 
 	// Integration
 	for (size_t i = 0; i < points.size(); i++)
