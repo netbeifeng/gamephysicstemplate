@@ -27,6 +27,9 @@ void Point::addForce(Vec3 f)
 		force += f;
 }
 
+/*
+Converts acceleration to force and adds it.
+*/
 void Point::addAcceleration(Vec3 a)
 {
 	if (!fixed)
