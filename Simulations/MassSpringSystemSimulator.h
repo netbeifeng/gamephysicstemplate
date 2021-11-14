@@ -44,6 +44,7 @@ public:
 
 	void makeEulerStep(float step);
 	void makeMidpointStep(float step);
+	void makeLeapForg(float step);
 
 	// Do Not Change
 	void setIntegrator(int integrator) {

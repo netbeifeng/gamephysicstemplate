@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3,Demo 4 (Euler),Demo 4 (Midpoint)";
+	return "Demo 1,Demo 2,Demo 3,Demo 4 (Euler),Demo 4 (Midpoint), Demo 5";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -88,8 +88,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 
 		break;
 
-		// Setup for Demo 4
-	case 3: case 4:
+		// Setup for Demo 3,4,5
+	case 3: case 4: case 5:
 	{
 		// Construct a "sheet" of points connected with springs,
 		// with a small upward velocity
@@ -194,6 +194,10 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase)
 	case 4:
 		cout << "Demo 4 (Midpoint) selected.\n\n";
 		break;
+
+	case 5:
+		cout << "Demo 5 selected.\n\n";
+		break;
 	default:
 		break;
 	}
@@ -204,7 +208,7 @@ In Demo 4, allow the top left corner to be moved.
 Based on the mouse movement during a click, add difference vector to the current position.
 */
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
-	if (m_iTestCase == 3 || m_iTestCase == 4)
+	if (m_iTestCase == 3 || m_iTestCase == 4 || m_iTestCase == 5)
 	{
 		// Apply the mouse deltas to point[0] (move along cameras view plane)
 		Point2D mouseDiff;
@@ -245,6 +249,11 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	case 4:
 		addGravity(Vec3(0, -9, 0));
 		makeMidpointStep(timeStep);
+		enforceFloorBoundary();
+		break;
+	case 5:
+		addGravity(Vec3(0, -9, 0));
+		makeLeapForg(timeStep);
 		enforceFloorBoundary();
 		break;
 	default:
@@ -318,6 +327,20 @@ void MassSpringSystemSimulator::makeMidpointStep(float timeStep) {
 	midStatePoints.clear();
 }
 
+void MassSpringSystemSimulator::makeLeapForg(float timeStep) {
+	for each (Spring s in m_springs) {
+		// compute and update force
+		s.applyElasticForceToPoints(m_points);
+	}
+
+	for each (MassPoint * p in m_points) {
+		if (!p->getFixed()) {
+			p->setVelocity(p->getVelocity() + timeStep * (p->getForce() / p->getMass()));
+			p->setPosition(p->getPosition() + timeStep * p->getVelocity());
+		}
+		p->clearForce();
+	}
+}
 
 void MassSpringSystemSimulator::enforceFloorBoundary()
 {
