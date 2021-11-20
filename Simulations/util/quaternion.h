@@ -44,6 +44,7 @@ public:
 		z = scpysign( z, M.value[1][0] - M.value[0][1] );
 	}
 
+	// axis angle to quat
 	Quaternion (const vector3Dim<Scalar>& axis, Scalar angle)
 	{
 		Scalar mult = sin(angle*.5);
@@ -53,6 +54,7 @@ public:
 		w = cos (angle*.5);
 	}
 
+	// euler angle to quat?
 	Quaternion (Scalar rx, Scalar ry, Scalar rz)
 	{
 		Quaternion qx(vector3Dim<Scalar> (1.,0.,0.),-rx);
@@ -76,6 +78,7 @@ public:
 		normalize(axis);
 		return axis * 2.* phi2;
 	}
+
 	inline const Quaternion operator+=(const Quaternion &q)  { x+=q.x; y+=q.y; z+=q.z; w+=q.w; return *this;	};
 	inline const Quaternion operator+=(const Scalar m)  { x+=m; y+=m; z+=m; w+=m; return *this;	};
 	inline const Quaternion operator-=(const Quaternion &q)  { x-=q.x; y-=q.y; z-=q.z; w-=q.w; return *this;	};

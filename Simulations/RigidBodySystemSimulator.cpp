@@ -1,6 +1,8 @@
 #include "RigidBodySystemSimulator.h"
-#include "MassPoint.h"
-#include "Spring.h"
+#include <math.h>
+#define _USE_MATH_DEFINES
+
+#define DEG2RAD (M_PI * 2)/360.f
 
 RigidBodySystemSimulator::RigidBodySystemSimulator()
 {
@@ -12,7 +14,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator()
 /// *** UI functions *** ///
 
 const char* RigidBodySystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3,Demo 4 (Euler),Demo 4 (Midpoint), Demo 5";
+	return "Demo 1,Demo 2,Demo 3,Demo 4,Demo 5";
 }
 
 void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -28,8 +30,14 @@ void RigidBodySystemSimulator::reset()
 }
 
 void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {
+	std::mt19937 eng;
+	std::uniform_real_distribution<float> randCol(0.0f, 1.0f);
+	std::uniform_real_distribution<float> randPos(-0.5f, 0.5f);
 
-
+	for each (RigidBody * rb in m_rigidBodyList) {
+		DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(randCol(eng), randCol(eng), randCol(eng)));
+		DUC->drawRigidBody(rb->getToWorldMatrix());
+	}
 }
 
 /*
@@ -45,11 +53,12 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	// ** Setup Scene ** //
 	switch (testCase)
 	{
-		// Setup for Demos 1-3 
-	case 0: case 1: case 2:
-
+	case 0: 
+		addRigidBody(Vec3(0,0,0), Vec3(1,0.6,0.5),2);
+		setOrientationOf(0, Quat(0.0f, 0.0f, 90.0f * DEG2RAD));
+		applyForceOnBody(0, Vec3(0.3f, 0.5f, 0.25f), Vec3(1.0f, 1.0f, 0.0f));
 		break;
-
+	case 1: case 2: break;
 		// Setup for Demo 3,4,5
 	case 3: case 4: case 5:
 	{
@@ -66,7 +75,17 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	{
 	case 0:
 	{
+		integrateAll(2);
 
+		std::cout << "Position  (-0.3, -0.5, -0.25)" << std::endl;
+
+		Vec3 pos = Vec3(-0.3, -0.5, -0.25);
+		Vec3 linearVelocity = getLinearVelocityOfRigidBody(0);
+		Vec3 angularVelocity = getAngularVelocityOfRigidBody(0);
+
+		std::cout << "Velocity: " << linearVelocity + cross(angularVelocity, pos) << std::endl;
+		std::cout << "Linear Velocity: " << linearVelocity << std::endl;
+		std::cout << "Angular Velocity: " << angularVelocity << std::endl;
 	}
 	break;
 
@@ -124,6 +143,7 @@ void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed) {
 
 void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 {
+
 	switch (m_iTestCase)
 	{
 	case 1:
@@ -159,3 +179,70 @@ void RigidBodySystemSimulator::onMouse(int x, int y)
 	m_trackmouse.x = x;
 	m_trackmouse.y = y;
 }
+
+void RigidBodySystemSimulator::addRigidBody(Vec3 position, Vec3 size, int mass)
+{
+	m_rigidBodyList.push_back(new RigidBody(position, size, mass)); // push a new rigid body pointer to the list
+}
+
+void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
+{
+	RigidBody* toBeUpdatedRB = getRigidBodyByIdx(i);
+	if (toBeUpdatedRB != nullptr) {
+		toBeUpdatedRB->updateForce(force);       // add force
+		toBeUpdatedRB->updateForceLoc(loc);      // set force loc
+	}
+}
+
+void RigidBodySystemSimulator::setOrientationOf(int i, Quat orientation)
+{
+	RigidBody* toBeUpdatedRB = getRigidBodyByIdx(i);
+	if (toBeUpdatedRB != nullptr) {
+		toBeUpdatedRB->setRotation(orientation);
+	}
+}
+
+int RigidBodySystemSimulator::getNumberOfRigidBodies() {
+	return m_rigidBodyList.size();
+}
+
+Vec3 RigidBodySystemSimulator::getPositionOfRigidBody(int i) {
+	RigidBody* fetchedRB = getRigidBodyByIdx(i);
+	if (fetchedRB != nullptr) {
+		return fetchedRB->getCenterPosition();
+	}
+	return Vec3();
+}
+
+Vec3 RigidBodySystemSimulator::getAngularVelocityOfRigidBody(int i) {
+	RigidBody* fetchedRB = getRigidBodyByIdx(i);
+	if (fetchedRB != nullptr) {
+		return fetchedRB->getAngularVelocity();
+	}
+	return Vec3();
+}
+
+Vec3 RigidBodySystemSimulator::getLinearVelocityOfRigidBody(int i) {
+	RigidBody* fetchedRB = getRigidBodyByIdx(i);
+	if (fetchedRB != nullptr) {
+		return fetchedRB->getLinearVelocity();
+	}
+	return Vec3();
+}
+
+
+RigidBody* RigidBodySystemSimulator::getRigidBodyByIdx(int idx)
+{
+	if (idx > m_rigidBodyList.size() || idx < 0) {
+		std::cout << "Invalid index " << idx << ", out of range [ 0 , " << m_rigidBodyList.size() << " ]" << std::endl;
+		return nullptr; // if not found, return null pointer and check in each concrete functions
+	}
+	return m_rigidBodyList[idx]; // else return the fetched pointer
+}
+
+void RigidBodySystemSimulator::integrateAll(float timeStep) {
+	for each (RigidBody * rb in m_rigidBodyList) {
+		rb->integrate(timeStep);
+	}
+}
+

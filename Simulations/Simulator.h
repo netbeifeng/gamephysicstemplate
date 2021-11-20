@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iostream>
 #include "util/vectorbase.h"
+#include "util/matrixbase.h"
 #include "DrawingUtilitiesClass.h"
 
 struct Point2D {

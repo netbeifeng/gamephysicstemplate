@@ -224,8 +224,10 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Contact.cpp" />
     <ClCompile Include="MassPoint.cpp" />
     <ClCompile Include="MassSpringSystemSimulator.cpp" />
+    <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="RigidBodySystemSimulator.cpp" />
     <ClCompile Include="Spring.cpp" />
     <ClCompile Include="TemplateSimulator.cpp" />
@@ -233,9 +235,11 @@
     <ClCompile Include="util\util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Contact.h" />
     <ClInclude Include="DrawingUtilitiesClass.h" />
     <ClInclude Include="MassPoint.h" />
     <ClInclude Include="MassSpringSystemSimulator.h" />
+    <ClInclude Include="RigidBody.h" />
     <ClInclude Include="RigidBodySystemSimulator.h" />
     <ClInclude Include="Simulator.h" />
     <ClInclude Include="Spring.h" />

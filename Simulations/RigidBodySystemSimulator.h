@@ -1,6 +1,7 @@
 #ifndef RIGIDBODYSYSTEMSIMULATOR_h
 #define RIGIDBODYSYSTEMSIMULATOR_h
 #include "Simulator.h"
+#include "RigidBody.h"
 //add your header for your rigid body system, for e.g.,
 //#include "rigidBodySystem.h" 
 
@@ -32,15 +33,22 @@ public:
 	void setOrientationOf(int i,Quat orientation);
 	void setVelocityOf(int i, Vec3 velocity);
 
+	// Functions Created By Chang Luo 20.11.2021
+	RigidBody* getRigidBodyByIdx(int idx);
+	void integrateAll(float timeStep);
+
 private:
 	// Attributes
 	// add your RigidBodySystem data members, for e.g.,
 	// RigidBodySystem * m_pRigidBodySystem; 
+
+	vector<RigidBody*> m_rigidBodyList;
+
 	Vec3 m_externalForce;
 
 	// UI Attributes
 	Point2D m_mouse;
 	Point2D m_trackmouse;
 	Point2D m_oldtrackmouse;
-	};
+};
 #endif
