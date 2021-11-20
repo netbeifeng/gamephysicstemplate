@@ -20,8 +20,6 @@ RigidBody::RigidBody(Vec3 center_position, Vec3 size, float mass) {
 
 
 Mat4 RigidBody::getToWorldMatrix() {
-	//computeWorldMatrix();
-	//std::cout << m_toWorld << std::endl;
 	return m_toWorld;
 }
 
@@ -71,51 +69,47 @@ void RigidBody::preCompute() {
 	covarianceMatrix.value[0][0] = x_cov;
 	covarianceMatrix.value[1][1] = y_cov;
 	covarianceMatrix.value[2][2] = z_cov;
-	
-	//covarianceMatrix.value[0][0] = (1.0f / 12.0f) * (m_mass * (pow(m_size.y, 2) + pow(m_size.z, 2)));
-	//covarianceMatrix.value[1][1] = (1.0f / 12.0f) * (m_mass * (pow(m_size.x, 2) + pow(m_size.z, 2)));
-	//covarianceMatrix.value[2][2] = (1.0f / 12.0f) * (m_mass * (pow(m_size.x, 2) + pow(m_size.y, 2)));
-
-	//trace = covarianceMatrix.value[0][0] + covarianceMatrix.value[1][1] + covarianceMatrix.value[2][2];
 
 	Mat4 identityMatrix;
 	identityMatrix.initId();
 
 	Mat4 tmpInetriaTensor;
 	tmpInetriaTensor = identityMatrix * trace - covarianceMatrix;
+
 	tmpInetriaTensor.inverse();
 
 	m_inertiaTensor = tmpInetriaTensor;
-	//std::cout << (identityMatrix * trace - covarianceMatrix) << std::endl;
-	//std::cout << m_inertiaTensor << std::endl;
 }
 
 void RigidBody::initialize() {
+	// TODO: Not sure is it necessary?
 	//std::cout << "------ Initializing ------" << std::endl;
 	Mat4 m_rotationTransposed = m_rotation.getRotMat();
 	m_rotationTransposed.transpose();
-	updateInetriaTensor(m_rotation.getRotMat() * m_inertiaTensor * m_rotationTransposed);
+	setInetriaTensor(m_rotation.getRotMat() * m_inertiaTensor * m_rotationTransposed);
 
-	updateAngularVelocity(m_inertiaTensor * m_angularMomentum);
+	setAngularVelocity(m_inertiaTensor * m_angularMomentum);
 	//std::cout << "------ End Of Init ------" << std::endl;
 }
 
-void RigidBody::setRotation(Quat rotation) {
+void RigidBody::setUpRotation(Quat rotation) {
 	m_rotation = rotation;
-	this->initialize();
 }
 
-void RigidBody::updateForce(Vec3 force) {
-	m_force += force;
+void RigidBody::applyForce(Vec3 force) {
+	m_force = force;
 	//std::cout << "New Force = " << m_force << std::endl;
 }
 
-void RigidBody::updateForceLoc(Vec3 loc) {
+void RigidBody::applyForceLoc(Vec3 loc) {
 	m_forceLoc = loc;
 }
 
-void RigidBody::updateTorque(Vec3 force, Vec3 loc) {
-	m_torque += cross(force, loc);
+void RigidBody::calculateTorque(Vec3 force, Vec3 loc) {
+	//std::cout << "WHAT " << force;
+	//std::cout << "THE " << loc;
+	//std::cout << "FUCK " << cross(force, loc);
+	m_torque = cross(force, loc);
 	//std::cout << "New Torque = " << m_torque << std::endl;
 }
 
@@ -124,8 +118,8 @@ void RigidBody::updateCenterPosition(Vec3 pos) {
 	//std::cout << "New CenterPos = " << m_centerPosition << std::endl;
 }
 
-void RigidBody::updateAngularVelocity(Vec3 av) {
-	m_angularVelocity += av;
+void RigidBody::setAngularVelocity(Vec3 av) {
+	m_angularVelocity = av;
 	//std::cout << "New AngularVel = " << m_angularVelocity << std::endl;
 }
 
@@ -134,27 +128,33 @@ void RigidBody::updateLinearVelocity(Vec3 lv) {
 	//std::cout << "New LinearVel = " << m_linearVelocity << std::endl;
 }
 
+void RigidBody::updateRotation(Quat r) {
+	//std::cout << "\n " << r << "\n" << std::endl;
+	//std::cout << "From -----------\n" << std::endl;
+	//std::cout << m_rotation << std::endl;
+
+	m_rotation += r;
+	//std::cout << "To -----------\n" << std::endl;
+	//std::cout << m_rotation << std::endl;
+	//std::cout << "-----------\n" << std::endl;
+	//std::cout << "New Rotation = " << m_rotation << std::endl;
+}
+
 void RigidBody::updateAngularMomentum(Vec3 am) {
 	m_angularMomentum += am;
 	//std::cout << "New AngularMom = " << m_angularMomentum << std::endl;
 }
 
-void RigidBody::updateInetriaTensor(Mat4 it) {
+void RigidBody::setInetriaTensor(Mat4 it) {
 	m_inertiaTensor = it;
 	//std::cout << "New InetriaTensor = " << m_inertiaTensor << std::endl;
-}
-
-void RigidBody::updateRotation(Quat r) {
-	//std::cout << "\n " << r << "\n" << std::endl;
-	m_rotation += r;
-	//std::cout << "New Rotation = " << m_rotation << std::endl;
 }
 
 void RigidBody::integrate(float timeStep) {
 	// Refer to lecture05-rigid-bodies-3D.pdf Slide 14
 	//std::cout << "Integrating" << std::endl;
 
-	updateTorque(m_force, m_forceLoc);
+	calculateTorque(m_force, m_forceLoc);
 
 	updateCenterPosition(timeStep * m_linearVelocity); // update pos
 	
@@ -162,6 +162,8 @@ void RigidBody::integrate(float timeStep) {
 
 	// Integration Rotation
 	Quat angularVelocityQuat = Quat(m_angularVelocity.x, m_angularVelocity.y, m_angularVelocity.z, 0);
+	//std::cout << "AV: " << m_angularVelocity << std::endl;
+	//std::cout << "QUAT: " << angularVelocityQuat << std::endl;
 	updateRotation(0.5 * timeStep * angularVelocityQuat * m_rotation);
 
 	// Integration Angular Momentum
@@ -170,18 +172,17 @@ void RigidBody::integrate(float timeStep) {
 	// Integration (Inverse) Inetria Tensor
 	Mat4 m_rotationTransposed = m_rotation.getRotMat();
 	m_rotationTransposed.transpose(); // return void -_-!! Why? NG!
-	updateInetriaTensor(m_rotation.getRotMat() * m_inertiaTensor * m_rotationTransposed);
+	setInetriaTensor(m_rotation.getRotMat() * m_inertiaTensor * m_rotationTransposed);
 
 	// Integration Angualr Velocity
-	updateAngularVelocity(m_inertiaTensor * m_angularMomentum);
+	//std::cout << "AM: " << m_angularMomentum << std::endl;
+	setAngularVelocity(m_inertiaTensor * m_angularMomentum);
+	//std::cout << "AMV: " << m_angularVelocity << std::endl;
 
 	computeWorldMatrix();
-	//std::cout << getToWorldMatrix() << std::endl;
-
-	clear();
+	clearForce();
 }
 
-void RigidBody::clear() {
+void RigidBody::clearForce() {
 	m_force = Vec3();
-	m_torque = Vec3();
 }

@@ -14,7 +14,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator()
 /// *** UI functions *** ///
 
 const char* RigidBodySystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3,Demo 4,Demo 5";
+	return "Demo 1,Demo 2,Demo 3,Demo 4";
 }
 
 void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -27,6 +27,8 @@ void RigidBodySystemSimulator::reset()
 	m_mouse.x = m_mouse.y = 0;
 	m_trackmouse.x = m_trackmouse.y = 0;
 	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
+	
+	m_rigidBodyList.clear();
 }
 
 void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {
@@ -47,20 +49,30 @@ Reacts to change in test case (e.g. the drop-down menu, or when "reset scene" is
 */
 void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 {
+	reset();
 	// Pass argument to the attribute.
+	
 	m_iTestCase = testCase;
 
 	// ** Setup Scene ** //
 	switch (testCase)
 	{
-	case 0: 
-		addRigidBody(Vec3(0,0,0), Vec3(1,0.6,0.5),2);
+	case 0: {
+		addRigidBody(Vec3(0, 0, 0), Vec3(1, 0.6, 0.5), 2);
 		setOrientationOf(0, Quat(0.0f, 0.0f, 90.0f * DEG2RAD));
 		applyForceOnBody(0, Vec3(0.3f, 0.5f, 0.25f), Vec3(1.0f, 1.0f, 0.0f));
 		break;
-	case 1: case 2: break;
-		// Setup for Demo 3,4,5
-	case 3: case 4: case 5:
+	}
+	case 1: {
+		addRigidBody(Vec3(0, 0, 0), Vec3(1, 0.6, 0.5), 2);
+		setOrientationOf(0, Quat(0.0f, 0.0f, 90.0f * DEG2RAD));
+		applyForceOnBody(0, Vec3(0.3f, 0.5f, 0.25f), Vec3(1.0f, 1.0f, 0.0f));
+		break;
+	}
+	case 2: {
+		break; 
+	}
+	case 3:
 	{
 	
 		break;
@@ -75,6 +87,8 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	{
 	case 0:
 	{
+		cout << "Demo 1 selected.\n\n";
+
 		integrateAll(2);
 
 		std::cout << "Position  (-0.3, -0.5, -0.25)" << std::endl;
@@ -98,15 +112,7 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 		break;
 
 	case 3:
-		cout << "Demo 4 (Euler) selected.\n";
-		break;
-
-	case 4:
-		cout << "Demo 4 (Midpoint) selected.\n\n";
-		break;
-
-	case 5:
-		cout << "Demo 5 selected.\n\n";
+		cout << "Demo 4 selected.\n";
 		break;
 	default:
 		break;
@@ -146,11 +152,11 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 
 	switch (m_iTestCase)
 	{
+	case 0: break;
 	case 1:
-
+		integrateAll(0.01f);
 		break;
 	case 2:
-
 		break;
 	case 3:
 
@@ -189,8 +195,9 @@ void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
 {
 	RigidBody* toBeUpdatedRB = getRigidBodyByIdx(i);
 	if (toBeUpdatedRB != nullptr) {
-		toBeUpdatedRB->updateForce(force);       // add force
-		toBeUpdatedRB->updateForceLoc(loc);      // set force loc
+		std::cout << "NO FORCE???" << force << std::endl;
+		toBeUpdatedRB->applyForce(force);       // add force
+		toBeUpdatedRB->applyForceLoc(loc);      // set force loc
 	}
 }
 
@@ -198,7 +205,7 @@ void RigidBodySystemSimulator::setOrientationOf(int i, Quat orientation)
 {
 	RigidBody* toBeUpdatedRB = getRigidBodyByIdx(i);
 	if (toBeUpdatedRB != nullptr) {
-		toBeUpdatedRB->setRotation(orientation);
+		toBeUpdatedRB->setUpRotation(orientation);
 	}
 }
 
