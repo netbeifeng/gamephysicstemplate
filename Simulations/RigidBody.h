@@ -43,7 +43,7 @@ public:
 	void setAngularVelocity(Vec3 av);    // av' = I^-1 * L
 
 	void integrate(float timeStep);
-	void clear();
+	void clearForce();
 
 private:
 	Mat4 m_toWorld = Mat4();
@@ -60,6 +60,7 @@ private:
 	Vec3 m_angularVelocity = Vec3();
 	Vec3 m_linearVelocity = Vec3();
 	Mat4 m_inertiaTensor = Mat4();
+	Mat4 m_inertiaTensor0 = Mat4();
 
 	Vec3 m_angularMomentum = Vec3();
 

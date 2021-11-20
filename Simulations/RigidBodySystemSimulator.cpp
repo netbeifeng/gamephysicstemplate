@@ -195,7 +195,6 @@ void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
 {
 	RigidBody* toBeUpdatedRB = getRigidBodyByIdx(i);
 	if (toBeUpdatedRB != nullptr) {
-		std::cout << "NO FORCE???" << force << std::endl;
 		toBeUpdatedRB->applyForce(force);       // add force
 		toBeUpdatedRB->applyForceLoc(loc);      // set force loc
 	}

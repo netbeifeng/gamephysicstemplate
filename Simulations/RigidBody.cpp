@@ -14,7 +14,7 @@ RigidBody::RigidBody(Vec3 center_position, Vec3 size, float mass) {
 	m_forceLoc = Vec3();
 	m_torque = Vec3();
 	m_inertiaTensor = Mat4();
-
+	m_inertiaTensor0 = Mat4();
 	preCompute();
 }
 
@@ -78,7 +78,7 @@ void RigidBody::preCompute() {
 
 	tmpInetriaTensor.inverse();
 
-	m_inertiaTensor = tmpInetriaTensor;
+	m_inertiaTensor0 = tmpInetriaTensor;
 }
 
 void RigidBody::initialize() {
@@ -106,48 +106,38 @@ void RigidBody::applyForceLoc(Vec3 loc) {
 }
 
 void RigidBody::calculateTorque(Vec3 force, Vec3 loc) {
-	//std::cout << "WHAT " << force;
-	//std::cout << "THE " << loc;
-	//std::cout << "FUCK " << cross(force, loc);
-	m_torque = cross(force, loc);
+	m_torque = cross(loc, force);
 	//std::cout << "New Torque = " << m_torque << std::endl;
 }
 
 void RigidBody::updateCenterPosition(Vec3 pos) {
 	m_centerPosition += pos;
-	//std::cout << "New CenterPos = " << m_centerPosition << std::endl;
+	std::cout << "CP = " << m_centerPosition << std::endl;
 }
 
 void RigidBody::setAngularVelocity(Vec3 av) {
 	m_angularVelocity = av;
-	//std::cout << "New AngularVel = " << m_angularVelocity << std::endl;
+	std::cout << "AV = " << m_angularVelocity << std::endl;
 }
 
 void RigidBody::updateLinearVelocity(Vec3 lv) {
 	m_linearVelocity += lv;
-	//std::cout << "New LinearVel = " << m_linearVelocity << std::endl;
+	std::cout << "LV = " << m_linearVelocity << std::endl;
 }
 
 void RigidBody::updateRotation(Quat r) {
-	//std::cout << "\n " << r << "\n" << std::endl;
-	//std::cout << "From -----------\n" << std::endl;
-	//std::cout << m_rotation << std::endl;
-
 	m_rotation += r;
-	//std::cout << "To -----------\n" << std::endl;
-	//std::cout << m_rotation << std::endl;
-	//std::cout << "-----------\n" << std::endl;
-	//std::cout << "New Rotation = " << m_rotation << std::endl;
+	std::cout << "ROTA = " << m_rotation << std::endl;
 }
 
 void RigidBody::updateAngularMomentum(Vec3 am) {
 	m_angularMomentum += am;
-	//std::cout << "New AngularMom = " << m_angularMomentum << std::endl;
+	std::cout << "AM = " << m_angularMomentum << std::endl;
 }
 
 void RigidBody::setInetriaTensor(Mat4 it) {
 	m_inertiaTensor = it;
-	//std::cout << "New InetriaTensor = " << m_inertiaTensor << std::endl;
+	std::cout << "IN = \n" << m_inertiaTensor << std::endl;
 }
 
 void RigidBody::integrate(float timeStep) {
@@ -162,8 +152,7 @@ void RigidBody::integrate(float timeStep) {
 
 	// Integration Rotation
 	Quat angularVelocityQuat = Quat(m_angularVelocity.x, m_angularVelocity.y, m_angularVelocity.z, 0);
-	//std::cout << "AV: " << m_angularVelocity << std::endl;
-	//std::cout << "QUAT: " << angularVelocityQuat << std::endl;
+
 	updateRotation(0.5 * timeStep * angularVelocityQuat * m_rotation);
 
 	// Integration Angular Momentum
@@ -172,12 +161,14 @@ void RigidBody::integrate(float timeStep) {
 	// Integration (Inverse) Inetria Tensor
 	Mat4 m_rotationTransposed = m_rotation.getRotMat();
 	m_rotationTransposed.transpose(); // return void -_-!! Why? NG!
-	setInetriaTensor(m_rotation.getRotMat() * m_inertiaTensor * m_rotationTransposed);
+	//std::cout << "ROTMA = \n" << m_rotation.getRotMat() << std::endl;
+	//std::cout << "ROTMA_INV = \n" << m_rotationTransposed << std::endl;
+	//std::cout << "ROTMA_INTEN = \n" << m_inertiaTensor0 << std::endl;
+	//std::cout << "TOUP = \n" << m_rotation.getRotMat() * m_inertiaTensor0 * m_rotationTransposed << std::endl;
+	setInetriaTensor(m_rotation.getRotMat() * m_inertiaTensor0 * m_rotationTransposed);
 
 	// Integration Angualr Velocity
-	//std::cout << "AM: " << m_angularMomentum << std::endl;
 	setAngularVelocity(m_inertiaTensor * m_angularMomentum);
-	//std::cout << "AMV: " << m_angularVelocity << std::endl;
 
 	computeWorldMatrix();
 	clearForce();
