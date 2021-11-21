@@ -5,8 +5,6 @@ RigidBodySystemSimulator::RigidBodySystemSimulator() {
 	m_mouse = {0,0};
 	m_trackmouse = {0,0};
 	m_oldtrackmouse = {0,0};
-
-	cout << "Constr yay";
 }
 
 const char* RigidBodySystemSimulator::getTestCasesStr() {
@@ -24,7 +22,6 @@ void RigidBodySystemSimulator::reset() {
 void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {}
 
 void RigidBodySystemSimulator::notifyCaseChanged(int testCase) {
-	cout << "Test yay";
 
 }
 void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed) {}
