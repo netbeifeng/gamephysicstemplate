@@ -19,7 +19,7 @@ RigidBody::RigidBody(float x, float y, float z, float mass)
 
 	w_centerOfMass = Vec3(0, 0, 0);
 	w_centerVelocity = Vec3(0, 0, 0);
-	w_to_o_orientation = Quat(1,0,0,0);
+	w_to_o_orientation = Quat(0,0,0,1);
 
 	float mx = mass * 8 * (x / 2) * (x / 2);
 	float my = mass * 8 * (y / 2) * (y / 2);
