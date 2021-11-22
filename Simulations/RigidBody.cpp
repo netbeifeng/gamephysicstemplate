@@ -19,7 +19,7 @@ RigidBody::RigidBody(float x, float y, float z, float mass)
 
 	w_centerOfMass = Vec3(0, 0, 0);
 	w_centerVelocity = Vec3(0, 0, 0);
-	w_to_o_orientation = Quat(0,0,0,1);
+	o_to_w_orientation = Quat(0,0,0,1);
 
 	float mx = mass * 8 * (x / 2) * (x / 2);
 	float my = mass * 8 * (y / 2) * (y / 2);
@@ -36,9 +36,10 @@ RigidBody::RigidBody(float x, float y, float z, float mass)
 
 void RigidBody::addForce(Vec3 w_f, Vec3 w_pos)
 {
-	Mat4 rot = w_to_o_orientation.getRotMat();
-	Vec3 o_f = rot.transformVector(w_f);
-	Vec3 o_pos = rot.transformVector(w_pos);
+	Mat4 w_to_o = o_to_w_orientation.getRotMat();
+	w_to_o.transpose();
+	Vec3 o_f = w_to_o.transformVector(w_f);
+	Vec3 o_pos = w_to_o.transformVector(w_pos);
 
 	o_torque += cross(o_pos, o_f);
 	o_linForce += o_f;
