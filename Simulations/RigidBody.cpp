@@ -1,16 +1,6 @@
 #include "RigidBody.h"
 
-RigidBody::RigidBody()
-{
-	construct(1, 1, 1, 1);
-}
-
 RigidBody::RigidBody(float x, float y, float z, float mass)
-{
-	construct(x, y, z, mass);
-}
-
-void RigidBody::construct(float x, float y, float z, float mass)
 {
 	edges.clear();
 	masses.clear();

@@ -10,11 +10,9 @@ using namespace GamePhysics;
 class RigidBody
 {
 public:
-	RigidBody();
-	RigidBody(float,float,float, float);
+	RigidBody(float x=1,float y=1,float z=1, float m=1);
 
 private:
-	void construct(float, float, float, float);
 
 	vector<Vec3> edges;
 	vector<float> masses;
