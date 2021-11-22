@@ -33,6 +33,7 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 		RigidBody b = RigidBody(1, 0.6, 0.5, 2);
 		cout << "RigidBody constructed.\n";
 		cout << "Inverse object-space Inertia Tensor:\n" << b.getInvInertiaTensor() << "\n\n";
+		b.setOrientation(Quat(0,0, -M_PI/2));
 
 		b.addForce(Vec3(1,1,0), Vec3(0.3,0.5,0.25));
 		cout << "Force added.\n";

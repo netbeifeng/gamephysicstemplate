@@ -15,6 +15,8 @@ public:
 	Vec3 getTorque() { return o_torque; }
 	Mat4 getInvInertiaTensor() { return o_inertiaTensorInv; }
 
+	void setOrientation(Quat r) { w_to_o_orientation = r; }
+
 private:
 	vector<Vec3> o_edges;
 	vector<float> masses;
