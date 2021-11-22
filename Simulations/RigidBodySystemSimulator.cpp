@@ -1,4 +1,5 @@
 #include "RigidBodySystemSimulator.h"
+#include "RigidBody.h"
 
 RigidBodySystemSimulator::RigidBodySystemSimulator() {
 	m_externalForce = Vec3();
@@ -8,7 +9,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator() {
 }
 
 const char* RigidBodySystemSimulator::getTestCasesStr() {
-	return "D1,D2";
+	return "Demo 1";
 }
 
 void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {}
@@ -21,9 +22,28 @@ void RigidBodySystemSimulator::reset() {
 
 void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {}
 
-void RigidBodySystemSimulator::notifyCaseChanged(int testCase) {
+void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
+{
+	m_iTestCase = testCase;
 
+	switch (testCase)
+	{
+	case 0:
+	{
+		RigidBody b = RigidBody(1, 0.6, 0.5, 2);
+		cout << "RigidBody constructed.\n";
+		cout << "Inverse object-space Inertia Tensor:\n" << b.getInvInertiaTensor() << "\n\n";
+
+		b.addForce(Vec3(1,1,0), Vec3(0.3,0.5,0.25));
+		cout << "Force added.\n";
+		cout << "Torque: " << b.getTorque();
+		break;
+	}
+	default:
+		break;
+	}
 }
+
 void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed) {}
 void RigidBodySystemSimulator::simulateTimestep(float timeStep) {}
 void RigidBodySystemSimulator::onClick(int x, int y) {}
