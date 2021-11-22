@@ -5,11 +5,11 @@ RigidBody::RigidBody(float x, float y, float z, float mass)
 	o_edges.clear();
 	masses.clear();
 
-	for (int i = 1; i > 0; i -= 2)
+	for (int i = 1; i >= -1; i -= 2)
 	{
-		for (int j = 1; j > 0; j -= 2)
+		for (int j = 1; j >= -1; j -= 2)
 		{
-			for (int k = 1; k > 0; k -= 2)
+			for (int k = 1; k >= -1; k -= 2)
 			{
 				o_edges.push_back(Vec3(i * x / 2, j * y / 2, k * z / 2));
 				masses.push_back(mass);
