@@ -33,3 +33,14 @@ RigidBody::RigidBody(float x, float y, float z, float mass)
 	o_torque = Vec3(0, 0, 0);
 	o_linForce = Vec3(0, 0, 0);
 }
+
+void RigidBody::addForce(Vec3 w_f, Vec3 w_pos)
+{
+	Vec3 o_f = w_to_o_orientation.getRotMat().transformVector(w_f);
+
+	Vec3 o_pos = w_to_o_orientation.getRotMat().transformVector(w_pos);
+
+	o_torque += cross(o_pos, o_f);
+	o_linForce += o_f;
+}
+
