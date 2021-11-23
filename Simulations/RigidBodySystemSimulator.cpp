@@ -27,6 +27,20 @@ void RigidBodySystemSimulator::reset() {
 void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 {
 	DUC->drawRigidBody(bodies[0].getWorldMatrix());
+	switch (m_iTestCase)
+	{
+	case 0: case 1:
+	{
+		Vec3 forcePoint = Vec3(0.3, 0.5, 0.25);
+		Vec3 forceVector = Vec3(1, 1, 0);
+		DUC->drawSphere(forcePoint, 0.05);
+		DUC->beginLine();
+		DUC->drawLine(forcePoint, Vec3(0,0,0), forcePoint+forceVector, Vec3(1,1,1));
+		DUC->endLine();
+	}
+	}
+
+
 }
 
 void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
