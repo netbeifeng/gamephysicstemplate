@@ -1,5 +1,4 @@
 #include "RigidBodySystemSimulator.h"
-#include "RigidBody.h"
 
 RigidBodySystemSimulator::RigidBodySystemSimulator() {
 	m_externalForce = Vec3();
@@ -12,7 +11,12 @@ const char* RigidBodySystemSimulator::getTestCasesStr() {
 	return "Demo 1";
 }
 
-void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {}
+void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
+	this->DUC = DUC;
+	std::mt19937 eng;
+	std::uniform_real_distribution<float> randCol(0.0f, 1.0f);
+	DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(randCol(eng), randCol(eng), randCol(eng)));
+}
 
 void RigidBodySystemSimulator::reset() {
 	m_mouse.x = m_mouse.y = 0;
@@ -20,7 +24,10 @@ void RigidBodySystemSimulator::reset() {
 	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
 }
 
-void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {}
+void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
+{
+	DUC->drawRigidBody(bodies[0].getWorldMatrix());
+}
 
 void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 {
@@ -30,22 +37,23 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	{
 	case 0:
 	{
-		RigidBody b = RigidBody(1, 0.6, 0.5, 0.25);
-		// cout << "Inverse object-space Inertia Tensor:\n" << b.getInvInertiaTensor() << "\n\n";
-		b.setOrientation(Quat(0,0, M_PI/2));
+		bodies.clear();
+
+		bodies.push_back(RigidBody(Vec3(1, 0.6, 0.5), 2));
+		bodies[0].setOrientation(Quat(0,0, M_PI/2));
 		// cout << "Set orientation to " << Quat(0, 0, M_PI/2) << "\n";
 
-		b.addForce(Vec3(1,1,0), Vec3(0.3,0.5,0.25));
+		bodies[0].addForce(Vec3(1,1,0), Vec3(0.3,0.5,0.25));
 		// cout << "Force added.\n";
-		// cout << "Torque: " << b.getTorque() << "\n";
+		// cout << "Torque: " << bodies[0].getTorque() << "\n";
 
-		int pt = 3; // 4;
-		cout << "Original point position: " << b.getPointPosition(pt) << "\n";
-		b.integrate(2);
-		cout << "Integrated point velocity: " << b.getPointVelocity(pt) << "\n";
-		// cout << "Ang Mom: " << b.getAngularMomentum() << "\n";
-		cout << "Body Angular Velocity: " << b.getAngularVelocity() << "\n";
-		cout << "Body Linear Velocity: " << b.getLinearVelocity() << "\n";
+		int pt = 3;
+		cout << "Original point position: " << bodies[0].getPointPosition(pt) << "\n";
+		bodies[0].integrate(2);
+		cout << "Integrated total point velocity: " << bodies[0].getPointVelocity(pt) << "\n";
+		cout << "Body Angular Velocity: " << bodies[0].getAngularVelocity() << "\n";
+		cout << "Body Linear Velocity: " << bodies[0].getLinearVelocity() << "\n";
+
 		break;
 	}
 	default:

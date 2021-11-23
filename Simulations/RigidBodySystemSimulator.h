@@ -3,6 +3,7 @@
 #include "Simulator.h"
 //add your header for your rigid body system, for e.g.,
 //#include "rigidBodySystem.h" 
+#include "RigidBody.h"
 
 #define TESTCASEUSEDTORUNTEST 2
 
@@ -33,6 +34,7 @@ public:
 	void setVelocityOf(int i, Vec3 velocity);
 
 private:
+	vector<RigidBody> bodies;
 	// Attributes
 	// add your RigidBodySystem data members, for e.g.,
 	// RigidBodySystem * m_pRigidBodySystem; 
