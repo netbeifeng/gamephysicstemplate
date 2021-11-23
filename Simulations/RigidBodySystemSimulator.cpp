@@ -30,14 +30,22 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	{
 	case 0:
 	{
-		RigidBody b = RigidBody(1, 0.6, 0.5, 2);
-		cout << "RigidBody constructed.\n";
-		cout << "Inverse object-space Inertia Tensor:\n" << b.getInvInertiaTensor() << "\n\n";
-		b.setOrientation(Quat(0,0, -M_PI/2));
+		RigidBody b = RigidBody(1, 0.6, 0.5, 0.25);
+		// cout << "Inverse object-space Inertia Tensor:\n" << b.getInvInertiaTensor() << "\n\n";
+		b.setOrientation(Quat(0,0, M_PI/2));
+		// cout << "Set orientation to " << Quat(0, 0, M_PI/2) << "\n";
 
 		b.addForce(Vec3(1,1,0), Vec3(0.3,0.5,0.25));
-		cout << "Force added.\n";
-		cout << "Torque: " << b.getTorque();
+		// cout << "Force added.\n";
+		// cout << "Torque: " << b.getTorque() << "\n";
+
+		int pt = 3; // 4;
+		cout << "Original point position: " << b.getPointPosition(pt) << "\n";
+		b.integrate(2);
+		cout << "Integrated point velocity: " << b.getPointVelocity(pt) << "\n";
+		// cout << "Ang Mom: " << b.getAngularMomentum() << "\n";
+		cout << "Body Angular Velocity: " << b.getAngularVelocity() << "\n";
+		cout << "Body Linear Velocity: " << b.getLinearVelocity() << "\n";
 		break;
 	}
 	default:
