@@ -8,7 +8,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator() {
 }
 
 const char* RigidBodySystemSimulator::getTestCasesStr() {
-	return "Demo 1";
+	return "Demo 1, Demo 2";
 }
 
 void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
@@ -33,20 +33,31 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 {
 	m_iTestCase = testCase;
 
+	// * Setup Scene * //
+	switch (testCase)
+	{
+	case 0: case 1:
+	{
+		bodies.clear();
+		bodies.push_back(RigidBody(Vec3(1, 0.6, 0.5), 2));
+		bodies[0].setOrientation(Quat(0, 0, M_PI / 2));
+		// cout << "Set orientation to " << Quat(0, 0, M_PI/2) << "\n";
+
+		bodies[0].addForce(Vec3(1, 1, 0), Vec3(0.3, 0.5, 0.25));
+		// cout << "Force added.\n";
+		// cout << "Torque: " << bodies[0].getTorque() << "\n";
+		break;
+	}
+	default:
+		break;
+	}
+
+	// * Output * //
 	switch (testCase)
 	{
 	case 0:
 	{
-		bodies.clear();
-
-		bodies.push_back(RigidBody(Vec3(1, 0.6, 0.5), 2));
-		bodies[0].setOrientation(Quat(0,0, M_PI/2));
-		// cout << "Set orientation to " << Quat(0, 0, M_PI/2) << "\n";
-
-		bodies[0].addForce(Vec3(1,1,0), Vec3(0.3,0.5,0.25));
-		// cout << "Force added.\n";
-		// cout << "Torque: " << bodies[0].getTorque() << "\n";
-
+		cout << "Demo 1 selected.\n";
 		int pt = 3;
 		cout << "Original point position: " << bodies[0].getPointPosition(pt) << "\n";
 		bodies[0].integrate(2);
@@ -56,13 +67,27 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 
 		break;
 	}
+	case 1:
+		cout << "Demo 2 selected.\n";
+		break;
 	default:
 		break;
 	}
 }
 
 void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed) {}
-void RigidBodySystemSimulator::simulateTimestep(float timeStep) {}
+void RigidBodySystemSimulator::simulateTimestep(float timeStep)
+{
+	switch (m_iTestCase)
+	{
+	case 1:
+		bodies[0].integrate(0.01);
+		break;
+	default:
+		break;
+	}
+}
+
 void RigidBodySystemSimulator::onClick(int x, int y) {}
 void RigidBodySystemSimulator::onMouse(int x, int y) {}
 
