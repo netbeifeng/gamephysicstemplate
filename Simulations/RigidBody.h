@@ -18,23 +18,23 @@ public:
 	Vec3 getCenterPosition() { return w_centerOfMass; };
 	Vec3 getPointPosition(int i);
 	Vec3 getPointVelocity(int i);
-	Vec3 getTorque() { return w_torque; }
-	Mat4 getInvInertiaTensor() { return o_inertiaTensorInv; }
-	Vec3 getAngularMomentum() { return w_angularMomentum; }
-	Vec3 getAngularVelocity() { return w_angularVelocity; }
-	Vec3 getLinearVelocity() { return w_centerVelocity; }
+	Vec3 getTorque() { return torque; }
+	Mat4 getInvInertiaTensor() { return inertiaTensorInv0; }
+	Vec3 getAngularMomentum() { return angularMomentum; }
+	Vec3 getAngularVelocity() { return angularVelocity; }
+	Vec3 getLinearVelocity() { return centerVelocity; }
 
-	void setOrientation(Quat r) { o_to_w_orientation = r; }
+	void setOrientation(Quat r) { orientation = r; }
 
 private:
 	float _mass;
 	Vec3 _size;
 	Vec3 w_centerOfMass;
-	Vec3 w_centerVelocity;
-	Quat o_to_w_orientation;
-	Vec3 w_angularMomentum;
-	Vec3 w_angularVelocity;
-	Mat4 o_inertiaTensorInv;
-	Vec3 w_torque;
-	Vec3 w_linForce;
+	Vec3 centerVelocity;
+	Quat orientation;
+	Vec3 angularMomentum;
+	Vec3 angularVelocity;
+	Mat4 inertiaTensorInv0;
+	Vec3 torque;
+	Vec3 linForce;
 };
