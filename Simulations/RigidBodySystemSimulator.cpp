@@ -37,6 +37,11 @@ void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateConte
 		DUC->beginLine();
 		DUC->drawLine(forcePoint, Vec3(0,0,0), forcePoint+forceVector, Vec3(1,1,1));
 		DUC->endLine();
+
+		for (size_t i = 0; i < 8; i++)
+		{
+			DUC->drawSphere(bodies[0].getPointPosition(i), 0.01);
+		}
 	}
 	}
 
