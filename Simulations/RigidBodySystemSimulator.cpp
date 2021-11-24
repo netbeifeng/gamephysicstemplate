@@ -94,7 +94,28 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	}
 }
 
-void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed) {}
+void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed) {
+	if (m_iTestCase == 1)
+	{
+		// Apply the mouse deltas to point[0] (move along cameras view plane)
+		Point2D mouseDiff;
+		mouseDiff.x = m_trackmouse.x - m_oldtrackmouse.x;
+		mouseDiff.y = m_trackmouse.y - m_oldtrackmouse.y;
+		if (mouseDiff.x != 0 || mouseDiff.y != 0)
+		{
+			Mat4 worldViewInv = Mat4(DUC->g_camera.GetWorldMatrix() * DUC->g_camera.GetViewMatrix());
+			worldViewInv = worldViewInv.inverse();
+			Vec3 inputView = Vec3((float)mouseDiff.x, (float)-mouseDiff.y, 0);
+			Vec3 inputWorld = worldViewInv.transformVectorNormal(inputView);
+			// find a proper scale!
+			float inputScale = 0.000015f;
+			inputWorld = inputWorld * inputScale;
+			bodies[0].addForce(inputWorld, bodies[0].getPointPosition(0));
+		}
+	}
+
+}
+
 void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 {
 	switch (m_iTestCase)
@@ -107,8 +128,20 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 	}
 }
 
-void RigidBodySystemSimulator::onClick(int x, int y) {}
-void RigidBodySystemSimulator::onMouse(int x, int y) {}
+void RigidBodySystemSimulator::onClick(int x, int y)
+{
+	m_trackmouse.x = x;
+	m_trackmouse.y = y;
+
+}
+
+void RigidBodySystemSimulator::onMouse(int x, int y)
+{
+	m_oldtrackmouse.x = x;
+	m_oldtrackmouse.y = y;
+	m_trackmouse.x = x;
+	m_trackmouse.y = y;
+}
 
 // ExtraFunctions
 int RigidBodySystemSimulator::getNumberOfRigidBodies() { return 0; }
