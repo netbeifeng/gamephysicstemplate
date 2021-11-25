@@ -26,7 +26,9 @@ public:
 	Vec3 getCenterPosition();
 	Vec3 getLinearVelocity();
 	Vec3 getAngularVelocity();
+	Mat4 getInertiaTensorInv();
 
+	float getMass();
 
 	void applyForce(Vec3 force);
 	void applyForceLoc(Vec3 loc);
@@ -44,6 +46,9 @@ public:
 
 	void integrate(float timeStep);
 	void clearForce();
+
+	void setAsFixed();
+	bool isFixed();
 
 private:
 	Mat4 m_toWorld = Mat4();

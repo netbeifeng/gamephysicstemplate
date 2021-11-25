@@ -23,6 +23,8 @@ public:
 	void onClick(int x, int y);
 	void onMouse(int x, int y);
 
+	float random(float a, float b);
+
 	// ExtraFunctions
 	int getNumberOfRigidBodies();
 	Vec3 getPositionOfRigidBody(int i);
@@ -36,13 +38,21 @@ public:
 	// Functions Created By Chang Luo 20.11.2021
 	RigidBody* getRigidBodyByIdx(int idx);
 	void integrateAll(float timeStep);
+	void checkCollision();
+
+	// Interactions 
+	Vec3 getPickingRay(float x, float y);
 
 private:
 	// Attributes
 	// add your RigidBodySystem data members, for e.g.,
 	// RigidBodySystem * m_pRigidBodySystem; 
 
+	float m_Bounciness = 0.f; // fully plastic 1.f for elastic
+
 	vector<RigidBody*> m_rigidBodyList;
+
+	Vec3 m_color;
 
 	Vec3 m_externalForce;
 
