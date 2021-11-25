@@ -20,8 +20,8 @@ using namespace GamePhysics;
 
 //#define ADAPTIVESTEP
 
-#define TEMPLATE_DEMO
-//#define MASS_SPRING_SYSTEM
+//#define TEMPLATE_DEMO
+#define MASS_SPRING_SYSTEM
 //#define RIGID_BODY_SYSTEM
 //#define SPH_SYSTEM
 
@@ -248,7 +248,7 @@ void CALLBACK OnFrameMove( double dTime, float fElapsedTime, void* pUserContext 
 			g_pDUC->g_pTweakBar = nullptr;
 		}
 		initTweakBar();
-		g_pSimulator->notifyCaseChanged(g_iTestCase);
+		g_pSimulator->notifyCaseChanged(g_iTestCase, g_fTimestep);
 		g_pSimulator->initUI(g_pDUC);
 		g_iPreTestCase = g_iTestCase;
 	}

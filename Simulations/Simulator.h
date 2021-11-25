@@ -56,7 +56,7 @@ public:
 	so that the needed changes can be handed here
 	**for more info on how to use this function take a look at the template simulator 
 	*/
-	virtual void notifyCaseChanged(int testCase) = 0;
+	virtual void notifyCaseChanged(int testCase, float timeStep) = 0;
 
 	/*
 	this function is used to receive the input from the mouse

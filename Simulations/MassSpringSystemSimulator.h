@@ -1,6 +1,8 @@
 #ifndef MASSSPRINGSYSTEMSIMULATOR_h
 #define MASSSPRINGSYSTEMSIMULATOR_h
 #include "Simulator.h"
+#include "MassPoint.h"
+#include "Spring.h"
 
 // Do Not Change
 #define EULER 0
@@ -19,7 +21,7 @@ public:
 	void initUI(DrawingUtilitiesClass * DUC);
 	void reset();
 	void drawFrame(ID3D11DeviceContext* pd3dImmediateContext);
-	void notifyCaseChanged(int testCase);
+	void notifyCaseChanged(int testCase, float timestep);
 	void externalForcesCalculations(float timeElapsed);
 	void simulateTimestep(float timeStep);
 	void onClick(int x, int y);
@@ -36,7 +38,15 @@ public:
 	Vec3 getPositionOfMassPoint(int index);
 	Vec3 getVelocityOfMassPoint(int index);
 	void applyExternalForce(Vec3 force);
-	
+
+	// Additional Functions
+	void applyForcesToCurrentPoints(Vec3 gravity);
+	void makeEulerStep(float, Vec3);
+	void makeMidpointStep(float, Vec3);
+	void makeLeapFrogStep(float, Vec3);
+	void enforceFloorBoundary();
+	void addGravity(Vec3);
+
 	// Do Not Change
 	void setIntegrator(int integrator) {
 		m_iIntegrator = integrator;
@@ -48,6 +58,10 @@ private:
 	float m_fStiffness;
 	float m_fDamping;
 	int m_iIntegrator;
+
+	// Additional Data Attributes
+	vector<Point*> points;
+	vector<Spring> springs;
 
 	// UI Attributes
 	Vec3 m_externalForce;
