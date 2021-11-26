@@ -15,9 +15,24 @@ RigidBody::RigidBody(Vec3 center_position, Vec3 size, float mass) {
 	m_torque = Vec3();
 	m_inertiaTensor = Mat4();
 	m_inertiaTensor0 = Mat4();
-	preCompute();
+
+	srand(time(nullptr) + rand());
+	m_color = Vec3(((float)rand()) / (float)RAND_MAX, ((float)rand()) / (float)RAND_MAX, ((float)rand()) / (float)RAND_MAX);
+
+	preComputeInertiaTensor0();
 }
 
+Vec3 RigidBody::getColor() {
+	return m_color;
+}
+
+Vec3 RigidBody::getSize() {
+	return m_size;
+}
+
+Quat RigidBody::getRotation() {
+	return m_rotation;
+}
 
 float RigidBody::getMass() {
 	return m_mass;
@@ -54,44 +69,43 @@ void RigidBody::computeWorldMatrix() {
 
 	// ScaleFac * Rot * Trans
 	m_toWorld = scale * rotation * translation;
+	updateVertexOfWorld();
 }
 
-void RigidBody::preCompute() {
-	float x_cov = (m_mass / 8) * 2 * pow(m_size.x, 2);
-	float y_cov = (m_mass / 8) * 2 * pow(m_size.y, 2);
-	float z_cov = (m_mass / 8) * 2 * pow(m_size.z, 2);
-	float trace = x_cov + y_cov + z_cov;
+void RigidBody::preComputeInertiaTensor0() {
+	//float x_cov = m_mass * 2 * pow(m_size.x, 2);
+	//float y_cov = m_mass * 2 * pow(m_size.y, 2);
+	//float z_cov = m_mass * 2 * pow(m_size.z, 2);
+	//float trace = x_cov + y_cov + z_cov;
 
-	Mat4 covarianceMatrix = Mat4();
-	covarianceMatrix.initId();
+	//Mat4 covarianceMatrix = Mat4();
+	//covarianceMatrix.initId();
 
-	covarianceMatrix.value[0][0] = x_cov;
-	covarianceMatrix.value[1][1] = y_cov;
-	covarianceMatrix.value[2][2] = z_cov;
-	covarianceMatrix.value[3][3] = 1 * trace;
+	//covarianceMatrix.value[0][0] = x_cov;
+	//covarianceMatrix.value[1][1] = y_cov;
+	//covarianceMatrix.value[2][2] = z_cov;
+	//covarianceMatrix.value[3][3] = 1 * trace;
 
-	Mat4 identityMatrix;
-	identityMatrix.initId();
+	//Mat4 identityMatrix;
+	//identityMatrix.initId();
 
 	Mat4 tmpInetriaTensor;
-	tmpInetriaTensor = identityMatrix * trace - covarianceMatrix;
+	//tmpInetriaTensor = identityMatrix * trace - covarianceMatrix;
+	//tmpInetriaTensor.value[3][3] = 1;
+	//tmpInetriaTensor.inverse();
+	//std::cout << "InetriaTensorInv - Tutorial Method: \n" << tmpInetriaTensor << std::endl;
+
+	tmpInetriaTensor.initId();
+	tmpInetriaTensor.value[0][0] = (1.f / 12.f) * m_mass * (pow(m_size.y, 2) + pow(m_size.z, 2));
+	tmpInetriaTensor.value[1][1] = (1.f / 12.f) * m_mass * (pow(m_size.x, 2) + pow(m_size.z, 2));
+	tmpInetriaTensor.value[2][2] = (1.f / 12.f) * m_mass * (pow(m_size.x, 2) + pow(m_size.y, 2));
+	//tmpInetriaTensor.value[3][3] = 0;
 
 	tmpInetriaTensor.inverse();
 
+	//std::cout << "InetriaTensorInv - Wikipedia Method: \n" << tmpInetriaTensor << std::endl;
+
 	m_inertiaTensor0 = tmpInetriaTensor;
-}
-
-void RigidBody::initialize() {
-	// TODO: Not sure is it necessary?
-	//std::cout << "------ Initializing ------" << std::endl;
-
-	Mat4 m_rotationTransposed = m_rotation.getRotMat();
-	m_rotationTransposed.transpose();
-	setInetriaTensor(m_rotation.getRotMat() * m_inertiaTensor * m_rotationTransposed);
-
-	setAngularVelocity(m_inertiaTensor * m_angularMomentum);
-
-	//std::cout << "------ End Of Init ------" << std::endl;
 }
 
 void RigidBody::setUpRotation(Quat rotation) {
@@ -99,7 +113,6 @@ void RigidBody::setUpRotation(Quat rotation) {
 }
 
 void RigidBody::applyForce(Vec3 force) {
-	//std::cout << "What force" << force << std::endl;
 	m_force += force;
 	//std::cout << "New Force = " << m_force << std::endl;
 }
@@ -168,6 +181,8 @@ void RigidBody::integrate(float timeStep) {
 		// Integration Angualr Velocity
 		setAngularVelocity(m_inertiaTensor * m_angularMomentum);
 		computeWorldMatrix();
+		updateVertexOfWorld();
+
 		clearForce();
 	}
 }
@@ -183,4 +198,53 @@ void RigidBody::setAsFixed() {
 
 bool RigidBody::isFixed() {
 	return m_isFixed;
+}
+
+void RigidBody::updateVertexOfWorld() {
+	//
+	//        1 --------- 4
+	//       /|          /|
+	//      / |         / |
+ 	//     /  |        /  |
+	//    2 --|------ 3   |
+	//    |   5 ------|-- 8
+	//    |  /        |  /
+	//    | /         | /
+	//    |/          |/
+	//    6 --------- 7
+	//
+	//
+
+	m_vertices.clear();
+	Vec3 p1 = 0.5 * Vec3(-1, 1, -1);
+	Vec3 p2 = 0.5 * Vec3(-1, 1, 1);
+	Vec3 p3 = 0.5 * Vec3(1,  1, 1);
+	Vec3 p4 = 0.5 * Vec3(1,  1, -1);
+
+	Vec3 p5 = 0.5 * Vec3(-1, -1, -1);
+	Vec3 p6 = 0.5 * Vec3(-1, -1, 1);
+	Vec3 p7 = 0.5 * Vec3(1,  -1, 1);
+	Vec3 p8 = 0.5 * Vec3(1,  -1, -1);
+
+	Mat4 rotation = m_rotation.getRotMat();
+
+	m_vertices.push_back(m_toWorld.transformVector(p1));
+	m_vertices.push_back(m_toWorld.transformVector(p2));
+	m_vertices.push_back(m_toWorld.transformVector(p3));
+	m_vertices.push_back(m_toWorld.transformVector(p4));
+	m_vertices.push_back(m_toWorld.transformVector(p5));
+	m_vertices.push_back(m_toWorld.transformVector(p6));
+	m_vertices.push_back(m_toWorld.transformVector(p7));
+	m_vertices.push_back(m_toWorld.transformVector(p8));
+}
+
+vector<Vec3> RigidBody::getVertices() {
+	return m_vertices;
+}
+
+Vec3 RigidBody::getVertexInWorldByIdx(int idx) {
+	if (idx < m_vertices.size()) {
+		return (m_vertices[idx]);
+	}
+	//std::cout << "Invalid Vertex Index " << idx << " only has size " << m_vertices.size() << std::endl;
 }

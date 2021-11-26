@@ -19,16 +19,23 @@ public:
 	Mat4 getToWorldMatrix();
 
 	void computeWorldMatrix();
-	void preCompute();
-	void initialize();
+	void preComputeInertiaTensor0();
 	void setUpRotation(Quat rotation);
 
+	void updateVertexOfWorld();
 	Vec3 getCenterPosition();
 	Vec3 getLinearVelocity();
 	Vec3 getAngularVelocity();
 	Mat4 getInertiaTensorInv();
+	Quat getRotation();
+	Vec3 getSize();
 
+	vector<Vec3> getVertices();
+	Vec3 getVertexInWorldByIdx(int idx);
+
+	Vec3 getColor();
 	float getMass();
+
 
 	void applyForce(Vec3 force);
 	void applyForceLoc(Vec3 loc);
@@ -49,6 +56,7 @@ public:
 
 	void setAsFixed();
 	bool isFixed();
+
 
 private:
 	Mat4 m_toWorld = Mat4();
@@ -72,6 +80,10 @@ private:
 	float m_mass = 0.0f;
 
 	bool m_isFixed = false;
+
+	vector<Vec3> m_vertices = vector<Vec3>();
+
+	Vec3 m_color = Vec3();
 };
 
 #endif
