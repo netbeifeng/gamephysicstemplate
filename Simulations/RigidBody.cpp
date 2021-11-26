@@ -40,6 +40,20 @@ Mat4 RigidBody::getWorldMatrix() {
 	return scale * orientation.getRotMat() * translate;
 }
 
+Mat4 RigidBody::getWorldInvInertia()
+{
+	Mat4 rot = orientation.getRotMat();
+	Mat4 rotT = orientation.getRotMat();
+	rotT.transpose();
+	return rot * inertiaTensorInv0 * rotT;
+}
+
+void RigidBody::applyImpulse(Vec3 position, float J, Vec3 colNormal)
+{
+	centerVelocity = centerVelocity + J * colNormal / _mass;
+	angularMomentum = angularMomentum + cross(position, J * colNormal);
+}
+
 void RigidBody::integrate(float timestep)
 {
 	// * Linear Euler step * //
@@ -56,12 +70,7 @@ void RigidBody::integrate(float timestep)
 	angularMomentum = angularMomentum + timestep* torque;
 
 	// Rotation matrices
-	Mat4 rot = orientation.getRotMat();
-	Mat4 rotT = orientation.getRotMat();
-	rotT.transpose();
-	Mat4 current_inertiaTensorInv = rot * inertiaTensorInv0 * rotT;
-
-	angularVelocity = current_inertiaTensorInv.transformVector(angularMomentum);
+	angularVelocity = getWorldInvInertia().transformVector(angularMomentum);
 
 	// Clear forces
 	torque = Vec3(0, 0, 0);

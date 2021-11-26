@@ -1,4 +1,5 @@
 #include "RigidBodySystemSimulator.h"
+#include "collisionDetect.h"
 
 RigidBodySystemSimulator::RigidBodySystemSimulator() {
 	m_externalForce = Vec3();
@@ -8,7 +9,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator() {
 }
 
 const char* RigidBodySystemSimulator::getTestCasesStr() {
-	return "Demo 1, Demo 2";
+	return "Demo 1,Demo 2,Demo 3";
 }
 
 void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
@@ -26,11 +27,16 @@ void RigidBodySystemSimulator::reset() {
 
 void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 {
-	DUC->drawRigidBody(bodies[0].getWorldMatrix());
+	for (RigidBody b : bodies)
+	{
+		DUC->drawRigidBody(b.getWorldMatrix());
+	}
+
 	switch (m_iTestCase)
 	{
 	case 0: case 1:
 	{
+		// Draw force vector
 		Vec3 forcePoint = Vec3(0.3, 0.5, 0.25);
 		Vec3 forceVector = Vec3(1, 1, 0);
 		DUC->drawSphere(forcePoint, 0.05);
@@ -38,11 +44,15 @@ void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateConte
 		DUC->drawLine(forcePoint, Vec3(0,0,0), forcePoint+forceVector, Vec3(1,1,1));
 		DUC->endLine();
 
+		// Draw edges
 		for (size_t i = 0; i < 8; i++)
 		{
 			DUC->drawSphere(bodies[0].getPointPosition(i), 0.01);
 		}
+		break;
 	}
+	default:
+		break;
 	}
 
 
@@ -67,6 +77,20 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 		// cout << "Torque: " << bodies[0].getTorque() << "\n";
 		break;
 	}
+	case 2:
+	{
+		bodies.clear();
+
+		bodies.push_back(RigidBody(Vec3(1, 1, 1), 1));
+		bodies[0].setPosition(Vec3(1, 1, 1));
+		bodies[0].addForce(Vec3(0,-2,0), Vec3(0.5, 1, 1));
+
+		bodies.push_back(RigidBody(Vec3(5, 1, 5), 25));
+		bodies[1].setPosition(Vec3(0, -1, 0));
+
+
+		break;
+	}
 	default:
 		break;
 	}
@@ -88,6 +112,9 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	}
 	case 1:
 		cout << "Demo 2 selected.\n";
+		break;
+	case 2:
+		cout << "Demo 3 selected.\n";
 		break;
 	default:
 		break;
@@ -123,6 +150,44 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 	case 1:
 		bodies[0].integrate(0.01);
 		break;
+	case 2:
+	{
+		// Integration
+		for (size_t i=0; i<bodies.size(); i++)
+		{
+			bodies[i].integrate(timeStep);
+		}
+
+		// Collision detection
+		Mat4 AM = bodies[0].getWorldMatrix();
+		Mat4 BM = bodies[1].getWorldMatrix();
+		CollisionInfo col = checkCollisionSAT(AM, BM);
+		if (col.isValid)
+		{
+			// Resolve collision
+			float c = 0.9;
+			Vec3 vrel = bodies[1].getLinearVelocity() - bodies[0].getLinearVelocity();
+			Vec3 n = col.normalWorld;
+			float nume = -(1 + c) * dot(vrel, n);
+
+			float Ma = bodies[0].getMass();
+			float Mb = bodies[1].getMass();
+			Mat4 Ia = bodies[0].getWorldInvInertia();
+			Mat4 Ib = bodies[1].getWorldInvInertia();
+
+			Vec3 xa = col.collisionPointWorld - bodies[0].getCenterPosition();
+			Vec3 xb = col.collisionPointWorld - bodies[1].getCenterPosition();
+			Vec3 isa = cross(Ia.transformVector(cross(xa, n)), xa);
+			Vec3 isb = cross(Ib.transformVector(cross(xb, n)), xb);
+			float denom = 1/Ma + 1/Mb + dot(isa + isb, n);
+
+			auto J = nume / denom;
+
+			bodies[0].applyImpulse(xa, J, -n);
+			bodies[1].applyImpulse(xa, J, n);
+		}
+		break;
+	}
 	default:
 		break;
 	}

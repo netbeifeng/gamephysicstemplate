@@ -13,6 +13,7 @@ public:
 
 	void addForce(Vec3 w_f, Vec3 w_pos);
 	void integrate(float);
+	void applyImpulse(Vec3 position, float J, Vec3 colNormal);
 
 	Mat4 getWorldMatrix();
 	Vec3 getCenterPosition() { return w_centerOfMass; };
@@ -20,11 +21,14 @@ public:
 	Vec3 getPointVelocity(int i);
 	Vec3 getTorque() { return torque; }
 	Mat4 getInvInertiaTensor() { return inertiaTensorInv0; }
+	Mat4 getWorldInvInertia();
 	Vec3 getAngularMomentum() { return angularMomentum; }
 	Vec3 getAngularVelocity() { return angularVelocity; }
 	Vec3 getLinearVelocity() { return centerVelocity; }
+	float getMass() { return _mass; }
 
 	void setOrientation(Quat r) { orientation = r; }
+	void setPosition(Vec3 p) { w_centerOfMass = p; }
 
 private:
 	float _mass;
