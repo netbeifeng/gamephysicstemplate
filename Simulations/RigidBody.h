@@ -51,6 +51,8 @@ public:
 	void setInetriaTensor(Mat4 it);      // I^-1' = r.getRot() * I^-1 * r.getRot().inverse()
 	void setAngularVelocity(Vec3 av);    // av' = I^-1 * L
 
+	void setCenterPosition(Vec3 cm);
+
 	void integrate(float timeStep);
 	void clearForce();
 

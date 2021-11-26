@@ -59,10 +59,11 @@ private:
 	// add your RigidBodySystem data members, for e.g.,
 	// RigidBodySystem * m_pRigidBodySystem; 
 
+	// Drawing Collison Normal
 	Vec3 m_colStart;
 	Vec3 m_colEnd;
 
-	float m_Bounciness = 0.f; // fully plastic 1.f for elastic
+	float m_Bounciness = 1.f; // fully plastic 1.f for elastic
 
 	vector<RigidBody*> m_rigidBodyList;
 	vector<RigidBody*> m_floorAndWalls;

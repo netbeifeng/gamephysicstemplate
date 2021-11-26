@@ -196,6 +196,10 @@ void RigidBody::setAsFixed() {
 	m_isFixed = true;
 }
 
+void RigidBody::setCenterPosition(Vec3 cm) {
+	m_centerPosition = cm;
+}
+
 bool RigidBody::isFixed() {
 	return m_isFixed;
 }
