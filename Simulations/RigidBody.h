@@ -15,13 +15,15 @@ public:
 	void integrate(float);
 	void applyImpulse(Vec3 position, float J, Vec3 colNormal);
 
+	Mat4 getWorldInvInertia();
+	Vec3 getVelocityOf(Vec3 position);
+
 	Mat4 getWorldMatrix();
 	Vec3 getCenterPosition() { return w_centerOfMass; };
 	Vec3 getPointPosition(int i);
 	Vec3 getPointVelocity(int i);
 	Vec3 getTorque() { return torque; }
 	Mat4 getInvInertiaTensor() { return inertiaTensorInv0; }
-	Mat4 getWorldInvInertia();
 	Vec3 getAngularMomentum() { return angularMomentum; }
 	Vec3 getAngularVelocity() { return angularVelocity; }
 	Vec3 getLinearVelocity() { return centerVelocity; }

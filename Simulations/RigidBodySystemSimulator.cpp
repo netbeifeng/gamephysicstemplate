@@ -159,32 +159,38 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 		}
 
 		// Collision detection
-		Mat4 AM = bodies[0].getWorldMatrix();
-		Mat4 BM = bodies[1].getWorldMatrix();
-		CollisionInfo col = checkCollisionSAT(AM, BM);
-		if (col.isValid)
+		for (size_t i = 0; i < bodies.size(); i++)
 		{
-			// Resolve collision
-			float c = 0.9;
-			Vec3 vrel = bodies[1].getLinearVelocity() - bodies[0].getLinearVelocity();
-			Vec3 n = col.normalWorld;
-			float nume = -(1 + c) * dot(vrel, n);
+			for (size_t j = 0; j < i; j++)
+			{
+				Mat4 AM = bodies[i].getWorldMatrix();
+				Mat4 BM = bodies[j].getWorldMatrix();
+				CollisionInfo col = checkCollisionSAT(AM, BM);
+				if (col.isValid)
+				{
+					// Resolve collision
+					float c = 0.9;
+					Vec3 vrel = bodies[j].getVelocityOf(col.collisionPointWorld) - bodies[i].getVelocityOf(col.collisionPointWorld);
+					Vec3 n = col.normalWorld;
+					float nume = -(1 + c) * dot(vrel, n);
 
-			float Ma = bodies[0].getMass();
-			float Mb = bodies[1].getMass();
-			Mat4 Ia = bodies[0].getWorldInvInertia();
-			Mat4 Ib = bodies[1].getWorldInvInertia();
+					float Ma = bodies[i].getMass();
+					float Mb = bodies[j].getMass();
+					Mat4 Ia = bodies[i].getWorldInvInertia();
+					Mat4 Ib = bodies[j].getWorldInvInertia();
 
-			Vec3 xa = col.collisionPointWorld - bodies[0].getCenterPosition();
-			Vec3 xb = col.collisionPointWorld - bodies[1].getCenterPosition();
-			Vec3 isa = cross(Ia.transformVector(cross(xa, n)), xa);
-			Vec3 isb = cross(Ib.transformVector(cross(xb, n)), xb);
-			float denom = 1/Ma + 1/Mb + dot(isa + isb, n);
+					Vec3 xa = col.collisionPointWorld - bodies[i].getCenterPosition();
+					Vec3 xb = col.collisionPointWorld - bodies[j].getCenterPosition();
+					Vec3 isa = cross(Ia.transformVector(cross(xa, n)), xa);
+					Vec3 isb = cross(Ib.transformVector(cross(xb, n)), xb);
+					float denom = 1 / Ma + 1 / Mb + dot(isa + isb, n);
 
-			auto J = nume / denom;
+					auto J = nume / denom;
 
-			bodies[0].applyImpulse(xa, J, -n);
-			bodies[1].applyImpulse(xa, J, n);
+					bodies[i].applyImpulse(xa, J, -n);
+					bodies[j].applyImpulse(xb, J, n);
+				}
+			}
 		}
 		break;
 	}

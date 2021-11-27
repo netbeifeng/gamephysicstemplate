@@ -54,6 +54,12 @@ void RigidBody::applyImpulse(Vec3 position, float J, Vec3 colNormal)
 	angularMomentum = angularMomentum + cross(position, J * colNormal);
 }
 
+Vec3 RigidBody::getVelocityOf(Vec3 position)
+{
+	Mat4 rot = orientation.getRotMat();
+	return centerVelocity + cross(angularVelocity, rot.transformVector(position));
+}
+
 void RigidBody::integrate(float timestep)
 {
 	// * Linear Euler step * //
@@ -87,6 +93,5 @@ Vec3 RigidBody::getPointPosition(int i)
 Vec3 RigidBody::getPointVelocity(int i)
 {
 	Vec3 edge = Vec3(((i >> 2 & 1) * 2 - 1) * _size.x, ((i >> 1 & 1) * 2 - 1) * _size.y, ((i & 1) * 2 - 1) * _size.z) / 2;
-	Mat4 rot = orientation.getRotMat();
-	return centerVelocity + cross(angularVelocity, rot.transformVector(edge));
+	return getVelocityOf(edge);
 }
