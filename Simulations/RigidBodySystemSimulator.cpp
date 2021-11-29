@@ -170,25 +170,32 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 				{
 					// Resolve collision
 					float c = 0.9;
-					Vec3 vrel = bodies[j].getVelocityOf(col.collisionPointWorld) - bodies[i].getVelocityOf(col.collisionPointWorld);
+					Vec3 vrel = bodies[i].getVelocityOf(col.collisionPointWorld) - bodies[j].getVelocityOf(col.collisionPointWorld);
 					Vec3 n = col.normalWorld;
-					float nume = -(1 + c) * dot(vrel, n);
+					if (dot(vrel, n) > 0) {
+						cout << "+";
+					}
+					else {
 
-					float Ma = bodies[i].getMass();
-					float Mb = bodies[j].getMass();
-					Mat4 Ia = bodies[i].getWorldInvInertia();
-					Mat4 Ib = bodies[j].getWorldInvInertia();
+						float nume = -(1 + c) * dot(vrel, n);
 
-					Vec3 xa = col.collisionPointWorld - bodies[i].getCenterPosition();
-					Vec3 xb = col.collisionPointWorld - bodies[j].getCenterPosition();
-					Vec3 isa = cross(Ia.transformVector(cross(xa, n)), xa);
-					Vec3 isb = cross(Ib.transformVector(cross(xb, n)), xb);
-					float denom = 1 / Ma + 1 / Mb + dot(isa + isb, n);
+						float Ma = bodies[i].getMass();
+						float Mb = bodies[j].getMass();
+						Mat4 Ia = bodies[i].getWorldInvInertia();
+						Mat4 Ib = bodies[j].getWorldInvInertia();
 
-					auto J = nume / denom;
+						Vec3 xa = col.collisionPointWorld - bodies[i].getCenterPosition();
+						Vec3 xb = col.collisionPointWorld - bodies[j].getCenterPosition();
+						Vec3 isa = cross(Ia.transformVector(cross(xa, n)), xa);
+						Vec3 isb = cross(Ib.transformVector(cross(xb, n)), xb);
+						float denom = 1 / Ma + 1 / Mb + dot(isa + isb, n);
 
-					bodies[i].applyImpulse(xa, J, -n);
-					bodies[j].applyImpulse(xb, J, n);
+						auto J = nume / denom;
+
+						bodies[i].applyImpulse(xa, J, n);
+						bodies[j].applyImpulse(xa, J, -n);
+
+					}
 				}
 			}
 		}
