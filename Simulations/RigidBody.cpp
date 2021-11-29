@@ -51,13 +51,13 @@ Mat4 RigidBody::getWorldInvInertia()
 void RigidBody::applyImpulse(Vec3 position, float J, Vec3 colNormal)
 {
 	centerVelocity = centerVelocity + J * colNormal / _mass;
-	angularMomentum = angularMomentum + cross(position, J * colNormal);
+	angularMomentum = angularMomentum + cross(position - w_centerOfMass, J * colNormal);
 }
 
 Vec3 RigidBody::getVelocityOf(Vec3 position)
 {
-	Mat4 rot = orientation.getRotMat();
-	return centerVelocity + cross(angularVelocity, rot.transformVector(position));
+	Vec3 relpos = position - w_centerOfMass;
+	return centerVelocity + cross(angularVelocity, relpos);
 }
 
 void RigidBody::integrate(float timestep)
