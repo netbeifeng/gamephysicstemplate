@@ -93,5 +93,6 @@ Vec3 RigidBody::getPointPosition(int i)
 Vec3 RigidBody::getPointVelocity(int i)
 {
 	Vec3 edge = Vec3(((i >> 2 & 1) * 2 - 1) * _size.x, ((i >> 1 & 1) * 2 - 1) * _size.y, ((i & 1) * 2 - 1) * _size.z) / 2;
-	return getVelocityOf(edge);
+	Mat4 rot = orientation.getRotMat();
+	return centerVelocity + cross(angularVelocity, rot.transformVector(edge));
 }
