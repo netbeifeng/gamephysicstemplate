@@ -224,7 +224,6 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Contact.cpp" />
     <ClCompile Include="MassPoint.cpp" />
     <ClCompile Include="MassSpringSystemSimulator.cpp" />
     <ClCompile Include="RigidBody.cpp" />
@@ -235,7 +234,6 @@
     <ClCompile Include="util\util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Contact.h" />
     <ClInclude Include="DrawingUtilitiesClass.h" />
     <ClInclude Include="MassPoint.h" />
     <ClInclude Include="MassSpringSystemSimulator.h" />

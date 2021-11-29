@@ -25,12 +25,11 @@ public:
 
 	// Drawers
 	void drawRigidBodyFrame(RigidBody* rb, bool drawBody);
-	void drawCollision();
 	void drawFloorAndWall();
 	
 	// Getters
-	RigidBody* getRigidBodyByIdx(int idx);
 	int getNumberOfRigidBodies();
+	RigidBody* getRigidBodyByIdx(int idx);
 	Vec3 getPositionOfRigidBody(int i);
 	Vec3 getLinearVelocityOfRigidBody(int i);
 	Vec3 getAngularVelocityOfRigidBody(int i);
@@ -39,18 +38,14 @@ public:
 	void applyForceOnBody(int i, Vec3 loc, Vec3 force);
 	void addRigidBody(Vec3 position, Vec3 size, int mass);
 	void setOrientationOf(int i,Quat orientation);
-	void setVelocityOf(int i, Vec3 velocity);
 	void setUpFloorAndWalls();
 
-
+	// Integration
 	void integrateAll(float timeStep);
 
 	// Collision Detection
 	void checkCollision();
 	void calculateCollision(RigidBody* rigidBody1, RigidBody* rigidBody2);
-
-	// Interactions 
-	Vec3 getPickingRay(float x, float y);
 
 	// Helper functions
 	float getNormOfVector(Vec3 v);
@@ -59,14 +54,10 @@ private:
 	// add your RigidBodySystem data members, for e.g.,
 	// RigidBodySystem * m_pRigidBodySystem; 
 
-	// Drawing Collison Normal
-	Vec3 m_colStart;
-	Vec3 m_colEnd;
-
 	float m_Bounciness = 1.f; // fully plastic 1.f for elastic
 
-	vector<RigidBody*> m_rigidBodyList;
-	vector<RigidBody*> m_floorAndWalls;
+	vector<RigidBody*> m_rigidBodyList; // rigid body list
+	vector<RigidBody*> m_floorAndWalls; // wall list
 
 	Vec3 m_externalForce;
 

@@ -15,31 +15,38 @@ class RigidBody {
 public:
 	RigidBody();
 	RigidBody(Vec3 position, Vec3 size, float mass);
+	void preComputeInertiaTensor0(); // pre computing (I0)
 
-	Mat4 getToWorldMatrix();
+	Mat4 getToWorldMatrix(); // get World matrix for drawing rigid body and detecting collision
 
-	void computeWorldMatrix();
-	void preComputeInertiaTensor0();
+	
+	// Trivial setters, for modifying the corresponding variables
 	void setUpRotation(Quat rotation);
+	void setCenterPosition(Vec3 cm);
 
-	void updateVertexOfWorld();
+	// Trivial getters
 	Vec3 getCenterPosition();
 	Vec3 getLinearVelocity();
 	Vec3 getAngularVelocity();
 	Mat4 getInertiaTensorInv();
 	Quat getRotation();
 	Vec3 getSize();
-
 	vector<Vec3> getVertices();
 	Vec3 getVertexInWorldByIdx(int idx);
-
 	Vec3 getColor();
 	float getMass();
 
-
+	// Force 
 	void applyForce(Vec3 force);
 	void applyForceLoc(Vec3 loc);
-	void calculateTorque(Vec3 force, Vec3 loc); // torque = force X LocV
+	void calculateTorque(Vec3 force, Vec3 loc); // torque = (Loc - CM) X Force
+
+	// Fixed control
+	void setAsFixed();
+	bool isFixed();
+
+	// Here after => Integration Methods
+	void integrate(float timeStep);
 
 	// Updaters for updates, which rely on those previous value (+=)
 	void updateCenterPosition(Vec3 pos); // x' = x + h * lv
@@ -51,14 +58,9 @@ public:
 	void setInetriaTensor(Mat4 it);      // I^-1' = r.getRot() * I^-1 * r.getRot().inverse()
 	void setAngularVelocity(Vec3 av);    // av' = I^-1 * L
 
-	void setCenterPosition(Vec3 cm);
-
-	void integrate(float timeStep);
+	void computeWorldMatrix();           // new world matrix -> update rigidbody drawing
+	void updateVertexOfWorld();          // new verticves -> update wireframe drawing
 	void clearForce();
-
-	void setAsFixed();
-	bool isFixed();
-
 
 private:
 	Mat4 m_toWorld = Mat4();
@@ -85,7 +87,7 @@ private:
 
 	vector<Vec3> m_vertices = vector<Vec3>();
 
-	Vec3 m_color = Vec3();
+	Vec3 m_color = Vec3(); // for each rigid body enable different colours
 };
 
 #endif

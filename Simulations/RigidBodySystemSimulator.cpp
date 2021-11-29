@@ -11,6 +11,8 @@ RigidBodySystemSimulator::RigidBodySystemSimulator()
 	m_mouse = { 0,0 };
 	m_trackmouse = { 0,0 };
 	m_oldtrackmouse = { 0,0 };
+
+	// intialize
 	m_Bounciness = 1.f;
 	m_floorAndWalls.clear();
 	m_rigidBodyList.clear();
@@ -26,7 +28,7 @@ void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC)
 {
 	this->DUC = DUC;
 
-	// add UI box for tuning Bounciness
+	// add UI element for tuning Bounciness (c)
 	if (m_iTestCase == 2 || m_iTestCase == 3) {
 		TwAddVarRW(DUC->g_pTweakBar, "“Bounciness”", TW_TYPE_FLOAT, &m_Bounciness, "min=0.0 max=1.0 step=0.01");
 	}
@@ -37,11 +39,14 @@ void RigidBodySystemSimulator::reset()
 	m_mouse.x = m_mouse.y = 0;
 	m_trackmouse.x = m_trackmouse.y = 0;
 	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
+
+	// reset variables
 	m_Bounciness = 1.f;
 	m_floorAndWalls.clear();
 	m_rigidBodyList.clear();
 }
 
+// get the norm of an arbitary vector
 float RigidBodySystemSimulator::getNormOfVector(Vec3 v) {
 	return sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
 }
@@ -51,10 +56,6 @@ void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateConte
 		drawRigidBodyFrame(rb, true);
 	}
 
-	if (m_iTestCase == 2) {
-		drawCollision();
-	}
-
 	if (m_iTestCase == 3) {
 		drawFloorAndWall();
 	}
@@ -62,8 +63,8 @@ void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateConte
 
 void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 {
+	// when the case is going to be changed, reset it.
 	reset();
-	// Pass argument to the attribute.
 	
 	m_iTestCase = testCase;
 
@@ -76,6 +77,7 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 		setOrientationOf(0, Quat(0, 0, M_PI / 2));
 		applyForceOnBody(0, Vec3(0.3f, 0.5f, 0.25f), Vec3(1.0f, 1.0f, 0.0f));
 
+		// single step integration with h = 2
 		integrateAll(2.f);
 
 		std::cout << "Position  (-0.3, -0.5, -0.25) \n" << std::endl;
@@ -97,6 +99,7 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 		break;
 	}
 	case 2: {
+		// two rigid bodies collision
 		cout << "Demo 3 selected.\n\n";
 		addRigidBody(Vec3(-0.25, -0.5, 0.1), Vec3(0.5, 0.5, 0.5), 2);
 		addRigidBody(Vec3(0.25, 0.5, -0.1), Vec3(0.5, 0.5, 0.5), 2);
@@ -111,6 +114,7 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	}
 	case 3:
 	{
+		// set up walls which are also 4 rigid bodies but they are fixed and has an infinite mass
 		setUpFloorAndWalls();
 
 		addRigidBody(Vec3(-0.25, 0.25, 0), Vec3(1, 0.6, 0.5), 5);
@@ -154,13 +158,12 @@ void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed) {
 			// find a proper scale!
 			float inputScale = 0.000015f;
 			inputWorld = inputWorld * inputScale;
-			// Apply difference vector
 
-			// TODO: Add some interactions
+			// interaction only for demo 2 and demo 4
 			if (m_iTestCase == 1)
 			{
 				m_rigidBodyList[0]->applyForce(Vec3(0, 0, 0.01f));
-				m_rigidBodyList[0]->applyForceLoc(Vec3(0, 0, 0));
+				m_rigidBodyList[0]->applyForceLoc(getRigidBodyByIdx(0)->getCenterPosition());
 			}
 			else if (m_iTestCase == 3) {
 				m_rigidBodyList[getNumberOfRigidBodies() - 1]->updateCenterPosition(inputWorld);
@@ -175,26 +178,20 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 
 	switch (m_iTestCase)
 	{
-	case 0: break;
-	case 1:
-		integrateAll(0.01f);
-		break;
-	case 2:
-		integrateAll(0.02f);
-		checkCollision();
-		break;
-	case 3:
-		integrateAll(timeStep);
-		checkCollision();
-		break;
-	case 4:
-
-		break;
-	case 5:
-
-		break;
-	default:
-		break;
+		case 0: break;
+		case 1:
+			integrateAll(0.01f);
+			break;
+		case 2:
+			integrateAll(timeStep * 0.1f);
+			checkCollision();
+			break;
+		case 3:
+			// timeStep has to be a very big number, otherwise bodies move extremly slow
+			integrateAll(timeStep);
+			checkCollision();
+			break;
+		default: break;
 	}
 }
 
@@ -221,7 +218,6 @@ void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
 {
 	RigidBody* toBeUpdatedRB = getRigidBodyByIdx(i);
 	if (toBeUpdatedRB != nullptr) {
-		//std::cout << "Indicator: " << i << ", " << loc << ", " << force;
 		toBeUpdatedRB->applyForce(force);       // add force
 		toBeUpdatedRB->applyForceLoc(loc);      // set force loc
 	}
@@ -268,29 +264,34 @@ Vec3 RigidBodySystemSimulator::getLinearVelocityOfRigidBody(int i) {
 RigidBody* RigidBodySystemSimulator::getRigidBodyByIdx(int idx)
 {
 	if (idx > m_rigidBodyList.size() || idx < 0) {
-		std::cout << "Invalid index " << idx << ", out of range [ 0 , " << m_rigidBodyList.size() << " ]" << std::endl;
+		string error_message = "Invalid index " + std::to_string(idx) + ", out of range [ 0 , " + std::to_string(m_rigidBodyList.size()) + " ]";
+		throw std::invalid_argument(error_message);
 		return nullptr; // if not found, return null pointer and check in each concrete functions
 	}
 	return m_rigidBodyList[idx]; // else return the fetched pointer
 }
 
+// Integration Method, for all rigid bodies in the rigidBody list will be integrated
 void RigidBodySystemSimulator::integrateAll(float timeStep) {
 	for each (RigidBody * rb in m_rigidBodyList) {
 		rb->integrate(timeStep);
 	}
 }
 
-// No efficient O(n^2)
+// check whether there is a collision occur
 void RigidBodySystemSimulator::checkCollision() {
 	int rigidBodiesNumber = getNumberOfRigidBodies();
 	
 	for (int idx = 0; idx < rigidBodiesNumber; idx++) {
 		RigidBody* rigidBody1 = getRigidBodyByIdx(idx);
+
+		// check with other rigid bodies
 		for (int idx_s = idx + 1; idx_s < rigidBodiesNumber; idx_s++) {
 			RigidBody* rigidBody2 = getRigidBodyByIdx(idx_s);
 			calculateCollision(rigidBody1 ,rigidBody2);
 		}
 
+		// check with floors and walls
 		for (int idx_w = 0; idx_w < m_floorAndWalls.size(); idx_w++) {
 			RigidBody* wall = m_floorAndWalls[idx_w];
 			calculateCollision(rigidBody1, wall);
@@ -298,21 +299,18 @@ void RigidBodySystemSimulator::checkCollision() {
 	}
 }
 
+// calculate the impulse and update the velocity and position
 void RigidBodySystemSimulator::calculateCollision(RigidBody* rigidBody1, RigidBody* rigidBody2) {
 	CollisionInfo collisionInfo = checkCollisionSAT(rigidBody1->getToWorldMatrix(), rigidBody2->getToWorldMatrix());
 	if (collisionInfo.isValid && (!rigidBody1->isFixed() || !rigidBody2->isFixed())) {
-		std::cout << "Collide!" << std::endl;
+		//std::cout << "Collide!" << std::endl;
 		Vec3 normal = collisionInfo.normalWorld;
 		Vec3 collisionPoint = collisionInfo.collisionPointWorld;
 
-		// How to get Position 
+		// Resolve the penetration 
 		Vec3 penetration = (normal * collisionInfo.depth) / 2;
 		rigidBody1->updateCenterPosition(penetration);
 		rigidBody2->updateCenterPosition(-penetration);
-
-
-		//m_colStart = collisionPoint;
-		//m_colEnd = collisionInfo.normalWorld + m_colStart;
 
 		Vec3 collisionPositionRigidBody1 = collisionPoint - rigidBody1->getCenterPosition();
 		Vec3 collisionPositionRigidBody2 = collisionPoint - rigidBody2->getCenterPosition();
@@ -337,6 +335,7 @@ void RigidBodySystemSimulator::calculateCollision(RigidBody* rigidBody1, RigidBo
 		double impulse = impulseCalculationPart1 / (impulseCalculationPart2 + impulseCalculationPart3);
 
 		//std::cout << "Impulse: " << impulse << std::endl;
+
 		if (rigidBody1->isFixed()) { // only update RigidBody2
 			std::cout << "Updating RigidBody 2" << std::endl;
 			rigidBody2->updateLinearVelocity((impulse * normal) / rigidBody2->getMass());
@@ -357,10 +356,9 @@ void RigidBodySystemSimulator::calculateCollision(RigidBody* rigidBody1, RigidBo
 			rigidBody2->updateAngularMomentum(-cross(collisionPositionRigidBody2, impulse * normal));
 		}
 	}
-	//m_colStart = Vec3();
-	//m_colEnd = Vec3();
 }
 
+// draw rigid body and also a wireframe for identifying the rigid body boundary
 void RigidBodySystemSimulator::drawRigidBodyFrame(RigidBody* rb, bool drawBody) {
 	// Body 
 	if (drawBody) {
@@ -403,18 +401,7 @@ void RigidBodySystemSimulator::drawRigidBodyFrame(RigidBody* rb, bool drawBody) 
 	}
 }
 
-
-// deprecated
-void RigidBodySystemSimulator::drawCollision() {
-	if (getNormOfVector(m_colStart) != 0 && getNormOfVector(m_colEnd) != 0) {
-		DUC->drawSphere(m_colStart, 0.01f);
-		DUC->beginLine();
-		DUC->drawLine(m_colStart, Vec3(1, 0, 0), m_colEnd, Vec3(1, 0, 0));
-		DUC->endLine();
-		DUC->drawSphere(m_colEnd, 0.01f);
-	}
-}
-
+// build boundary walls
 void RigidBodySystemSimulator::setUpFloorAndWalls() {
 	
 	m_floorAndWalls.clear();
@@ -465,6 +452,7 @@ void RigidBodySystemSimulator::setUpFloorAndWalls() {
 	farWall->setAsFixed();
 }
 
+// draw walls
 void RigidBodySystemSimulator::drawFloorAndWall() {
 	for each (RigidBody * rb in m_floorAndWalls) {
 		drawRigidBodyFrame(rb, false);
