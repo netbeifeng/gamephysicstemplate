@@ -13,7 +13,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator()
 	m_oldtrackmouse = { 0,0 };
 
 	// intialize
-	m_Bounciness = 1.f;
+	m_Bounciness = .95f;
 	m_floorAndWalls.clear();
 	m_rigidBodyList.clear();
 }
@@ -41,7 +41,7 @@ void RigidBodySystemSimulator::reset()
 	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
 
 	// reset variables
-	m_Bounciness = 1.f;
+	m_Bounciness = .95f;
 	m_floorAndWalls.clear();
 	m_rigidBodyList.clear();
 }
@@ -337,19 +337,19 @@ void RigidBodySystemSimulator::calculateCollision(RigidBody* rigidBody1, RigidBo
 		//std::cout << "Impulse: " << impulse << std::endl;
 
 		if (rigidBody1->isFixed()) { // only update RigidBody2
-			std::cout << "Updating RigidBody 2" << std::endl;
+			//std::cout << "Updating RigidBody 2" << std::endl;
 			rigidBody2->updateLinearVelocity((impulse * normal) / rigidBody2->getMass());
 			rigidBody2->updateAngularMomentum(cross(collisionPositionRigidBody2, impulse * normal));
 		}
 		else if (rigidBody2->isFixed()) { // only update RigidBody1
-			std::cout << "Updating RigidBody 1" << std::endl;
+			//std::cout << "Updating RigidBody 1" << std::endl;
 			rigidBody1->updateLinearVelocity((impulse * normal) / rigidBody1->getMass());
 			rigidBody1->updateAngularMomentum(cross(collisionPositionRigidBody1, impulse * normal));
 		}
 
 		// update both
 		if (!rigidBody1->isFixed() && !rigidBody2->isFixed()) {
-			std::cout << "Both" << std::endl;
+			//std::cout << "Both" << std::endl;
 			rigidBody1->updateLinearVelocity((impulse * normal) / rigidBody1->getMass());
 			rigidBody1->updateAngularMomentum(cross(collisionPositionRigidBody1, impulse * normal));
 			rigidBody2->updateLinearVelocity(-(impulse * normal) / rigidBody2->getMass());
