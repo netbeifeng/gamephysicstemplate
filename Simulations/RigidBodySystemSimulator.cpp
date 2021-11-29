@@ -9,7 +9,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator() {
 }
 
 const char* RigidBodySystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3";
+	return "Demo 1,Demo 2,Demo 3,Demo 4";
 }
 
 void RigidBodySystemSimulator::initUI(DrawingUtilitiesClass* DUC) {
@@ -91,6 +91,31 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 
 		break;
 	}
+	case 3:
+	{
+		bodies.clear();
+
+		// Small cube
+		bodies.push_back(RigidBody(Vec3(0.2,0.2,0.2),0.5));
+		bodies[0].setPosition(Vec3(1, 1, 1));
+		bodies[0].addForce(Vec3(-2, -2, -4), Vec3(1,1,1));
+
+		// Long stick
+		bodies.push_back(RigidBody(Vec3(2, 0.13, 0.13), 10));
+		bodies[1].setPosition(Vec3(-0.5, 0, -0.9));
+		bodies[1].setOrientation(Quat(0, -M_PI / 4, 0));
+		bodies[1].addForce(Vec3(0,0,-10), Vec3(-1.5, 0, -0.9));
+		bodies[1].addForce(Vec3(0, 0, 20), Vec3(0.5, 0, -0.9));
+
+		// More cubes
+		bodies.push_back(RigidBody(Vec3(0.2, 0.2, 0.2), 0.5));
+		bodies[2].setPosition(Vec3(-1, 1, -1));
+		bodies[2].addForce(Vec3(0, -1, 1), Vec3(-1, 1, -1));
+
+		bodies.push_back(RigidBody(Vec3(0.2, 0.2, 0.2), 0.5));
+		bodies[3].setPosition(Vec3(-1, 0, -1));
+
+	}
 	default:
 		break;
 	}
@@ -150,7 +175,7 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 	case 1:
 		bodies[0].integrate(0.01);
 		break;
-	case 2:
+	case 2: case 3:
 	{
 		// Integration
 		for (size_t i=0; i<bodies.size(); i++)
