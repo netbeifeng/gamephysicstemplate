@@ -35,6 +35,8 @@ public:
 
 private:
 	vector<RigidBody> bodies;
+	vector<Vec3> collisionPts;
+
 	// Attributes
 	// add your RigidBodySystem data members, for e.g.,
 	// RigidBodySystem * m_pRigidBodySystem; 

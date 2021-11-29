@@ -49,6 +49,27 @@ void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateConte
 		{
 			DUC->drawSphere(bodies[0].getPointPosition(i), 0.01);
 		}
+
+		break;
+	}
+	case 2:
+	{
+		// Collision points
+		for (size_t i = 0; i < collisionPts.size(); i++)
+		{
+			DUC->drawSphere(collisionPts[i], 0.05);
+		}
+		collisionPts.clear();
+		break;
+	}
+	case 3:
+	{
+		// Collision points
+		for (size_t i = 0; i < collisionPts.size(); i++)
+		{
+			DUC->drawSphere(collisionPts[i], 0.05);
+		}
+		collisionPts.clear();
 		break;
 	}
 	default:
@@ -220,7 +241,9 @@ void RigidBodySystemSimulator::simulateTimestep(float timeStep)
 						bodies[i].applyImpulse(xa, J, n);
 						bodies[j].applyImpulse(xa, J, -n);
 
+						cout << col.collisionPointWorld << " -- " << J << "\n";
 					}
+					collisionPts.push_back(col.collisionPointWorld);
 				}
 			}
 		}
