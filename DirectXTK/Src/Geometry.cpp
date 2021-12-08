@@ -780,7 +780,7 @@ void DirectX::ComputeTetrahedron(VertexCollection& vertices, IndexCollection& in
     static const XMVECTORF32 verts[4] =
     {
         { { {              0.f,          0.f,        1.f, 0 } } },
-        { { {  2.f*SQRT2 / 3.f,          0.f, -1.f / 3.f, 0 } } },
+        { { {  2.f * SQRT2 / 3.f,          0.f, -1.f / 3.f, 0 } } },
         { { {     -SQRT2 / 3.f,  SQRT6 / 3.f, -1.f / 3.f, 0 } } },
         { { {     -SQRT2 / 3.f, -SQRT6 / 3.f, -1.f / 3.f, 0 } } }
     };
@@ -1132,19 +1132,19 @@ namespace
         // Create the index data.
         size_t vbase = vertices.size();
         Bezier::CreatePatchIndices(tessellation, isMirrored, [&](size_t index)
-        {
-            index_push_back(indices, vbase + index);
-        });
+            {
+                index_push_back(indices, vbase + index);
+            });
 
         // Create the vertex data.
         Bezier::CreatePatchVertices(controlPoints, tessellation, isMirrored, [&](FXMVECTOR position, FXMVECTOR normal, FXMVECTOR textureCoordinate)
-        {
-            vertices.push_back(VertexPositionNormalTexture(position, normal, textureCoordinate));
-        });
+            {
+                vertices.push_back(VertexPositionNormalTexture(position, normal, textureCoordinate));
+            });
     }
 }
 
-        
+
 // Creates a teapot primitive.
 void DirectX::ComputeTeapot(VertexCollection& vertices, IndexCollection& indices, float size, size_t tessellation, bool rhcoords)
 {
