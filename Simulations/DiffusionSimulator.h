@@ -37,7 +37,7 @@ public:
 	void onMouse(int x, int y);
 	// Specific Functions
 	void drawObjects();
-	Grid* diffuseTemperatureExplicit();
+	Grid* diffuseTemperatureExplicit(float);
 	void diffuseTemperatureImplicit();
 
 private:

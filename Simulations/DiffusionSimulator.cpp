@@ -96,12 +96,12 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	}
 }
 
-Grid* DiffusionSimulator::diffuseTemperatureExplicit() {//add your own parameters
+Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {
 	Grid* newT = new Grid();
 	
-	auto pointwise = [newGrid = newT](int row, int col, float here, float left, float right, float below, float above)
+	auto pointwise = [newGrid = newT, d_t = timeStep](int row, int col, float here, float left, float right, float below, float above)
 	{
-		float t_a_ixiy22 = 0.002f;
+		float t_a_ixiy22 = d_t/4;
 		newGrid->setTemp(row, col, here + t_a_ixiy22*(left + right + below + above - 4*here));
 	};
 	T->iterate(pointwise);
@@ -174,7 +174,7 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 	switch (m_iTestCase)
 	{
 	case 0:
-		T = diffuseTemperatureExplicit();
+		T = diffuseTemperatureExplicit(timeStep);
 		break;
 	case 1:
 		diffuseTemperatureImplicit();
