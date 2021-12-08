@@ -8,11 +8,14 @@
 class Grid {
 public:
 	// Construtors
-	Grid();
-
+	Grid(int height = 16, int width = 16);
+	void iterate(std::function<void(int,int,float)>);
+	void iterate(std::function<void(int, int, float, float, float, float, float)>);
+	void setTemp(int, int, float);
 
 private:
 	// Attributes
+	vector<vector<float>> field;
 };
 
 

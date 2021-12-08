@@ -2,9 +2,43 @@
 #include "pcgsolver.h"
 using namespace std;
 
-Grid::Grid() {
+Grid::Grid(int height, int width) {
+	vector<float> row(width, 0.0f);
+	vector<vector<float>> res(height, row);
+	field = res;
 }
 
+void Grid::iterate(std::function<void(int, int, float)> f)
+{
+	for (int row = 0; row < field.size(); row++)
+	{
+		for (int col = 0; col < field[row].size(); col++)
+		{
+			f(row, col, field[row][col]);
+		}
+	}
+}
+
+void Grid::iterate(std::function<void(int, int, float, float, float, float, float)> f)
+{
+	for (int row = 0; row < field.size(); row++)
+	{
+		for (int col = 0; col < field[row].size(); col++)
+		{
+			float here = field[row][col];
+			float left  = row ==         0        ? 0 : field[row - 1][col];
+			float right = row == field.size() - 1 ? 0 : field[row + 1][col];
+			float below = col == field[row].size() - 1 ? 0 : field[row][col + 1];
+			float above = col ==         0        ? 0 : field[row][col - 1];
+			f(row, col, here, left, right, below, above);
+		}
+	}
+}
+
+void Grid::setTemp(int row, int col, float temp)
+{
+	field[row][col] = temp;
+}
 
 DiffusionSimulator::DiffusionSimulator()
 {
@@ -44,6 +78,14 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	{
 	case 0:
 		cout << "Explicit solver!\n";
+		T = new Grid();
+		for (int row = 4; row < 14; row++)
+		{
+			for (int col = 0; col < 4; col++)
+			{
+				T->setTemp(row, col, 50.0f);
+			}
+		}
 		break;
 	case 1:
 		cout << "Implicit solver!\n";
@@ -56,6 +98,14 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 
 Grid* DiffusionSimulator::diffuseTemperatureExplicit() {//add your own parameters
 	Grid* newT = new Grid();
+	
+	auto pointwise = [newGrid = newT](int row, int col, float here, float left, float right, float below, float above)
+	{
+		float t_a_ixiy22 = 0.002f;
+		newGrid->setTemp(row, col, here + t_a_ixiy22*(left + right + below + above - 4*here));
+	};
+	T->iterate(pointwise);
+
 	// to be implemented
 	//make sure that the temperature in boundary cells stays zero
 	return newT;
@@ -134,6 +184,15 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 
 void DiffusionSimulator::drawObjects()
 {
+	auto draw = [duc = DUC](int row, int col, float temp)
+	{
+		float scale = 0.05;
+		float grey = temp / 50;
+		duc->setUpLighting(Vec3(0, 0, 0), Vec3(1, 1, 1), 0.1, Vec3(grey, grey, grey));
+		duc->drawSphere(Vec3(row*scale, col*scale, 0), scale);
+	};
+
+	T->iterate(draw);
 	// to be implemented
 	//visualization
 }
