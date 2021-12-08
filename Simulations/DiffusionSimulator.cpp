@@ -2,10 +2,6 @@
 #include "pcgsolver.h"
 using namespace std;
 
-Grid::Grid() {
-}
-
-
 DiffusionSimulator::DiffusionSimulator()
 {
 	m_iTestCase = 0;
@@ -15,21 +11,68 @@ DiffusionSimulator::DiffusionSimulator()
 	// to be implemented
 }
 
-const char * DiffusionSimulator::getTestCasesStr(){
+const char * DiffusionSimulator::getTestCasesStr() {
 	return "Explicit_solver, Implicit_solver";
 }
 
-void DiffusionSimulator::reset(){
-		m_mouse.x = m_mouse.y = 0;
-		m_trackmouse.x = m_trackmouse.y = 0;
-		m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
-
+void DiffusionSimulator::reset() {
+	m_mouse.x = m_mouse.y = 0;
+	m_trackmouse.x = m_trackmouse.y = 0;
+	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
 }
 
 void DiffusionSimulator::initUI(DrawingUtilitiesClass * DUC)
 {
 	this->DUC = DUC;
 	// to be implemented
+	TwAddVarRW(DUC->g_pTweakBar, "Debug Mode", TW_TYPE_BOOLCPP, &m_debug, "");
+
+	TwAddVarCB(DUC->g_pTweakBar, "Width", TW_TYPE_UINT32, [](const void* value, void* clientData) {
+		DiffusionSimulator* simulator = static_cast<DiffusionSimulator*>(clientData);
+		std::cout << value << std::endl;
+		simulator->m_width = *static_cast<const unsigned int*>(value);
+		simulator->notifyCaseChanged(simulator->m_iTestCase);
+	}, [](void* value, void* clientData) {
+		*static_cast<unsigned int*>(value) = static_cast<const DiffusionSimulator*>(clientData)->m_width;
+	}, this, "step=1");
+
+	TwAddVarCB(DUC->g_pTweakBar, "Height", TW_TYPE_UINT32, [](const void* value, void* clientData) {
+		DiffusionSimulator* simulator = static_cast<DiffusionSimulator*>(clientData);
+		simulator->m_height = *static_cast<const unsigned int*>(value);
+		simulator->notifyCaseChanged(simulator->m_iTestCase);
+	}, [](void* value, void* clientData) {
+		*static_cast<unsigned int*>(value) = static_cast<const DiffusionSimulator*>(clientData)->m_height;
+	}, this, "step=1");
+
+	TwAddVarCB(DUC->g_pTweakBar, "Depth", TW_TYPE_UINT32, [](const void* value, void* clientData) {
+		DiffusionSimulator* simulator = static_cast<DiffusionSimulator*>(clientData);
+		simulator->m_depth = *static_cast<const unsigned int*>(value);
+		simulator->notifyCaseChanged(simulator->m_iTestCase);
+	}, [](void* value, void* clientData) {
+		*static_cast<unsigned int*>(value) = static_cast<const DiffusionSimulator*>(clientData)->m_depth;
+	}, this, "step=1");
+
+
+}
+
+bool DiffusionSimulator::isBoundary(int xIdx, int yIdx, int zIdx, Vec3 size) {
+	bool z0 = false;
+	if (size.z >= 3) {
+		z0 = zIdx == 0 && xIdx >= 0 && yIdx >= 0 || zIdx == m_depth - 1 && xIdx >= 0 && yIdx >= 0;
+	}
+
+	bool y0 = zIdx >= 0 && xIdx >= 0 && yIdx == 0 || yIdx == m_height - 1 && zIdx >= 0 && xIdx >= 0;
+	bool x0 = zIdx >= 0 && xIdx == 0 && yIdx >= 0 || xIdx == m_width - 1 && yIdx >= 0 && zIdx >= 0;
+
+	if (m_debug) {
+		//std::cout << "Idx: " << xIdx << " " << yIdx << " " << zIdx << std::endl;
+		//std::cout << "Bool: " << x0 << " " << y0 << " " << z0 << std::endl;
+	}
+
+	if (z0 || y0 || x0) {
+		return true;
+	}
+	return false;
 }
 
 void DiffusionSimulator::notifyCaseChanged(int testCase)
@@ -37,9 +80,29 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	m_iTestCase = testCase;
 	m_vfMovableObjectPos = Vec3(0, 0, 0);
 	m_vfRotate = Vec3(0, 0, 0);
-	//
-	//to be implemented
-	//
+	
+	// to be implemented
+
+	m_demo1_baseGrid = new Grid(m_width, m_height, m_depth);
+
+	// initialize baseGrid
+	for (int zIdx = 0; zIdx < m_depth; zIdx++) {
+		for (int yIdx = 0; yIdx < m_height; yIdx++) {
+			for (int xIdx = 0; xIdx < m_width; xIdx++) {
+				if (!isBoundary(xIdx, yIdx, zIdx, m_demo1_baseGrid->getSize())) {
+					m_demo1_baseGrid->setValue(xIdx, yIdx, zIdx, 1); // initialize grid with 1
+				}
+				else {
+					m_demo1_baseGrid->setValue(xIdx, yIdx, zIdx, 0); // keep boundaries 0
+				}
+			}
+		}
+	}
+
+	if (m_debug) {
+		m_demo1_baseGrid->debugPrint();
+	}
+
 	switch (m_iTestCase)
 	{
 	case 0:
@@ -54,10 +117,65 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	}
 }
 
-Grid* DiffusionSimulator::diffuseTemperatureExplicit() {//add your own parameters
-	Grid* newT = new Grid();
+Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your own parameters
+	Grid* oldT = m_demo1_baseGrid; // 0 and 15 are boundaries
+	Grid* newT = new Grid(16, 16, 1); // 1 ~ 14 available
+
 	// to be implemented
 	//make sure that the temperature in boundary cells stays zero
+	Vec3 size = oldT->getSize();
+
+	std::cout << size << std::endl;
+	float deltaXSquared = 1 / pow(size.x, 2);
+	float deltaYSquared = 1 / pow(size.y, 2);
+	float deltaZSquared = 1 / pow(size.z, 2);
+
+	if (size.z >= 3) {
+		for (int zIdx = 1; zIdx < size.z - 1; zIdx++) {
+			for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+				for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
+					float oldVal = oldT->getValue(xIdx, yIdx, zIdx);
+					float newVal = 0.f;
+					float xComponent = oldT->getValue(xIdx + 1, yIdx, zIdx) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx - 1, yIdx, zIdx);
+					float yComponent = oldT->getValue(xIdx, yIdx + 1, zIdx) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx, yIdx - 1, zIdx);
+					float zComponent = oldT->getValue(xIdx, yIdx, zIdx + 1) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx, yIdx, zIdx - 1);
+
+					newVal = oldVal + timeStep * m_alpha * (xComponent + yComponent + zComponent);
+
+					if (newVal > m_demo1_baseGrid->getMaxTemperature()) {
+						m_demo1_baseGrid->setMaxTemperature(newVal);
+					}
+
+					//std::cout << newVal << std::endl;
+					newT->setValue(xIdx, yIdx, zIdx, newVal);
+				}
+			}
+		}
+	} else {
+		for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+			for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
+				float oldVal = oldT->getValue(xIdx, yIdx, size.z - 1);
+				float newVal = 0.f;
+				float xComponent = oldT->getValue(xIdx + 1, yIdx, size.z - 1) - 2 * oldT->getValue(xIdx, yIdx, size.z - 1) + oldT->getValue(xIdx - 1, yIdx, size.z - 1);
+				float yComponent = oldT->getValue(xIdx, yIdx + 1, size.z - 1) - 2 * oldT->getValue(xIdx, yIdx, size.z - 1) + oldT->getValue(xIdx, yIdx - 1, size.z - 1);
+
+				newVal = oldVal + timeStep * m_alpha * (xComponent + yComponent + 0);
+
+				if (newVal > m_demo1_baseGrid->getMaxTemperature()) {
+					m_demo1_baseGrid->setMaxTemperature(newVal);
+				}
+				//std::cout << newVal << std::endl;
+				newT->setValue(xIdx, yIdx, size.z - 1, newVal);
+			}
+		}
+	}
+
+
+	if (m_debug) {
+		std::cout << "Update explicit" << std::endl;
+		newT->debugPrint();
+	}
+
 	return newT;
 }
 
@@ -124,7 +242,7 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 	switch (m_iTestCase)
 	{
 	case 0:
-		T = diffuseTemperatureExplicit();
+		m_demo1_baseGrid = diffuseTemperatureExplicit(.1f);
 		break;
 	case 1:
 		diffuseTemperatureImplicit();
@@ -132,16 +250,36 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 	}
 }
 
-void DiffusionSimulator::drawObjects()
+void DiffusionSimulator::drawObjects(Grid *grid) 
 {
 	// to be implemented
 	//visualization
+	float sphere_size = 0.04f;
+	Vec3 size = grid->getSize();
+	for (int zIdx = 0; zIdx < size.z; zIdx++) {
+		for (int yIdx = 0; yIdx < size.y; yIdx++) {
+			for (int xIdx = 0; xIdx < size.x; xIdx++) {
+				float x = xIdx * 0.1f - (size.x - 1) * 0.5 * 0.1f;
+				float y = yIdx * 0.1f;
+				float z = zIdx * 0.1f;
+
+				float value = grid->getValue(xIdx, yIdx, zIdx);
+				float maxTemperature = grid->getMaxTemperature();
+				float scaledTemperature = value / maxTemperature;
+				std::cout << value << " / " << maxTemperature << std::endl; // maybe take gradient here :@
+
+				Vec3 color = Vec3(0, scaledTemperature, scaledTemperature);
+				DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * color);
+				DUC->drawSphere(Vec3(x, y, z), Vec3(sphere_size));
+			}
+		}
+	}
 }
 
 
 void DiffusionSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 {
-	drawObjects();
+	drawObjects(m_demo1_baseGrid);
 }
 
 void DiffusionSimulator::onClick(int x, int y)
