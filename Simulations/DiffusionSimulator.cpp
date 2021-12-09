@@ -29,7 +29,6 @@ void DiffusionSimulator::initUI(DrawingUtilitiesClass * DUC)
 
 	TwAddVarCB(DUC->g_pTweakBar, "Width", TW_TYPE_UINT32, [](const void* value, void* clientData) {
 		DiffusionSimulator* simulator = static_cast<DiffusionSimulator*>(clientData);
-		std::cout << value << std::endl;
 		simulator->m_width = *static_cast<const unsigned int*>(value);
 		simulator->notifyCaseChanged(simulator->m_iTestCase);
 	}, [](void* value, void* clientData) {
@@ -52,7 +51,18 @@ void DiffusionSimulator::initUI(DrawingUtilitiesClass * DUC)
 		*static_cast<unsigned int*>(value) = static_cast<const DiffusionSimulator*>(clientData)->m_depth;
 	}, this, "step=1");
 
+	TwAddButton(DUC->g_pTweakBar, "Do One Step", [](void* clientData) { 
+		DiffusionSimulator* simulator = static_cast<DiffusionSimulator*>(clientData);
+		simulator->updateDemo1Grid(simulator->diffuseTemperatureExplicit(0.001f));
+	}, this, "");
 
+	TwAddVarRW(DUC->g_pTweakBar, "Alpha", TW_TYPE_FLOAT, &m_alpha, "step=0.01   min=0.01");
+
+}
+
+void DiffusionSimulator::updateDemo1Grid(Grid* grid) {
+	
+	m_demo1_baseGrid = grid;
 }
 
 bool DiffusionSimulator::isBoundary(int xIdx, int yIdx, int zIdx, Vec3 size) {
@@ -82,7 +92,6 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	m_vfRotate = Vec3(0, 0, 0);
 	
 	// to be implemented
-
 	m_demo1_baseGrid = new Grid(m_width, m_height, m_depth);
 
 	// initialize baseGrid
@@ -103,6 +112,9 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 		m_demo1_baseGrid->debugPrint();
 	}
 
+	//m_demo1_baseGrid = diffuseTemperatureExplicit(.01f);
+
+
 	switch (m_iTestCase)
 	{
 	case 0:
@@ -119,13 +131,13 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 
 Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your own parameters
 	Grid* oldT = m_demo1_baseGrid; // 0 and 15 are boundaries
-	Grid* newT = new Grid(16, 16, 1); // 1 ~ 14 available
 
 	// to be implemented
 	//make sure that the temperature in boundary cells stays zero
 	Vec3 size = oldT->getSize();
+	Grid* newT = new Grid(size.x, size.y, size.z); // 1 ~ 14 available
 
-	std::cout << size << std::endl;
+	//std::cout << size << std::endl;
 	float deltaXSquared = 1 / pow(size.x, 2);
 	float deltaYSquared = 1 / pow(size.y, 2);
 	float deltaZSquared = 1 / pow(size.z, 2);
@@ -140,7 +152,9 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 					float yComponent = oldT->getValue(xIdx, yIdx + 1, zIdx) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx, yIdx - 1, zIdx);
 					float zComponent = oldT->getValue(xIdx, yIdx, zIdx + 1) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx, yIdx, zIdx - 1);
 
-					newVal = oldVal + timeStep * m_alpha * (xComponent + yComponent + zComponent);
+					float cd = (xComponent / deltaXSquared) + (yComponent / deltaYSquared) + (zComponent / deltaZSquared);
+
+					newVal = oldVal + timeStep * m_alpha * cd;
 
 					if (newVal > m_demo1_baseGrid->getMaxTemperature()) {
 						m_demo1_baseGrid->setMaxTemperature(newVal);
@@ -152,20 +166,32 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 			}
 		}
 	} else {
-		for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
-			for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
-				float oldVal = oldT->getValue(xIdx, yIdx, size.z - 1);
-				float newVal = 0.f;
-				float xComponent = oldT->getValue(xIdx + 1, yIdx, size.z - 1) - 2 * oldT->getValue(xIdx, yIdx, size.z - 1) + oldT->getValue(xIdx - 1, yIdx, size.z - 1);
-				float yComponent = oldT->getValue(xIdx, yIdx + 1, size.z - 1) - 2 * oldT->getValue(xIdx, yIdx, size.z - 1) + oldT->getValue(xIdx, yIdx - 1, size.z - 1);
+		for (int zIdx = 0; zIdx < size.z; zIdx++) {
+			for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+				for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
+					float oldVal = oldT->getValue(xIdx, yIdx, size.z - 1);
+					float newVal = 0.f;
+					float xComponent = oldT->getValue(xIdx + 1, yIdx, zIdx) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx - 1, yIdx, zIdx);
+					float yComponent = oldT->getValue(xIdx, yIdx + 1, zIdx) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx, yIdx - 1, zIdx);
 
-				newVal = oldVal + timeStep * m_alpha * (xComponent + yComponent + 0);
+					float cd = (xComponent / deltaXSquared) + (yComponent / deltaYSquared) + 0;
 
-				if (newVal > m_demo1_baseGrid->getMaxTemperature()) {
-					m_demo1_baseGrid->setMaxTemperature(newVal);
+					if (m_debug) {
+						//std::cout << "XPART: " << (xComponent / deltaXSquared) << "   ";
+						//std::cout << "YPART: " << (yComponent / deltaYSquared) << "   ";
+						//std::cout << "ZPART: " << (0) << "   \n";
+
+						//std::cout << "(" << xIdx << ", " << yIdx << ", " << 0 << ") " << oldVal << " + " << timeStep << " * " << m_alpha << " * " << cd << std::endl;
+					}
+
+					newVal = oldVal + timeStep * m_alpha * cd;
+
+					if (newVal > m_demo1_baseGrid->getMaxTemperature()) {
+						m_demo1_baseGrid->setMaxTemperature(newVal);
+					}
+					//std::cout << newVal << std::endl;
+					newT->setValue(xIdx, yIdx, zIdx, newVal);
 				}
-				//std::cout << newVal << std::endl;
-				newT->setValue(xIdx, yIdx, size.z - 1, newVal);
 			}
 		}
 	}
@@ -175,7 +201,7 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 		std::cout << "Update explicit" << std::endl;
 		newT->debugPrint();
 	}
-
+	//m_demo1_baseGrid = newT;
 	return newT;
 }
 
@@ -242,7 +268,7 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 	switch (m_iTestCase)
 	{
 	case 0:
-		m_demo1_baseGrid = diffuseTemperatureExplicit(.1f);
+		m_demo1_baseGrid = diffuseTemperatureExplicit(timeStep);
 		break;
 	case 1:
 		diffuseTemperatureImplicit();
@@ -254,21 +280,23 @@ void DiffusionSimulator::drawObjects(Grid *grid)
 {
 	// to be implemented
 	//visualization
-	float sphere_size = 0.04f;
+	float sphere_size = 2;
 	Vec3 size = grid->getSize();
 	for (int zIdx = 0; zIdx < size.z; zIdx++) {
 		for (int yIdx = 0; yIdx < size.y; yIdx++) {
 			for (int xIdx = 0; xIdx < size.x; xIdx++) {
-				float x = xIdx * 0.1f - (size.x - 1) * 0.5 * 0.1f;
-				float y = yIdx * 0.1f;
-				float z = zIdx * 0.1f;
+				float x = (xIdx - (size.x - 1) * 0.5) * 0.5f;
+				float y = yIdx * 0.5f + 1;
+				float z = (zIdx - (size.z - 1) * 0.5) * 0.5f;
 
 				float value = grid->getValue(xIdx, yIdx, zIdx);
 				float maxTemperature = grid->getMaxTemperature();
 				float scaledTemperature = value / maxTemperature;
-				std::cout << value << " / " << maxTemperature << std::endl; // maybe take gradient here :@
-
-				Vec3 color = Vec3(0, scaledTemperature, scaledTemperature);
+				sphere_size = pow(0.35f * (1 + scaledTemperature), 4);
+				//std::cout << value << " / " << maxTemperature << std::endl; // maybe take gradient here :@
+				// cold -> blue RGB(0,0,1)
+				// hot -> red RGB(1,0,0)
+				Vec3 color = Vec3(sqrt(scaledTemperature), sqrt(1 - scaledTemperature), sqrt(1 - scaledTemperature));
 				DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * color);
 				DUC->drawSphere(Vec3(x, y, z), Vec3(sphere_size));
 			}

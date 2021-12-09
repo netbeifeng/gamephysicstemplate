@@ -22,7 +22,7 @@ public:
 	float getValue(unsigned int x, unsigned int y, unsigned int z) {
 		unsigned int idx = m_width * m_height * z + m_width * y + x;
 		if (idx < 0 || idx >  m_width * m_height * m_depth + m_width * m_height + m_width) {
-			throw exception("Index out of boundary");
+			throw std::out_of_range("Index out of boundary");
 		}
 		return m_values[idx];
 	} 
@@ -30,7 +30,7 @@ public:
 	void setValue(unsigned int x, unsigned int y, unsigned int z, float val) {
 		unsigned int idx = m_width * m_height * z + m_width * y + x;
 		if (idx < 0 || idx >  m_width * m_height * m_depth + m_width * m_height + m_width) {
-			throw exception("Index out of boundary");
+			throw std::out_of_range("Index out of boundary");
 		}
 		m_values[idx] = val;
 	}
@@ -52,6 +52,7 @@ public:
 	}
 
 	void debugPrint() {
+		std::cout << m_width << ", " << m_height << ", " << m_depth << std::endl;
 		for (unsigned int zIdx = 0; zIdx < m_depth; zIdx++) {
 			std::cout << "Z-Plane index = " << zIdx << std::endl;
 			
@@ -107,6 +108,8 @@ public:
 	void diffuseTemperatureImplicit();
 	
 	bool isBoundary(int xIdx, int yIdx, int zIdx, Vec3 size);
+
+	void updateDemo1Grid(Grid* grid);
 private:
 	// Attributes
 	Vec3  m_vfMovableObjectPos;
@@ -121,7 +124,7 @@ private:
 	unsigned int m_height = 16; // y
 	unsigned int m_depth = 1;  // z
 
-	bool m_debug = true;
+	bool m_debug = false;
 
 
 	Grid* m_demo1_baseGrid;
