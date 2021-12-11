@@ -51,10 +51,15 @@ void DiffusionSimulator::initUI(DrawingUtilitiesClass * DUC)
 		*static_cast<unsigned int*>(value) = static_cast<const DiffusionSimulator*>(clientData)->m_depth;
 	}, this, "step=1");
 
-	TwAddButton(DUC->g_pTweakBar, "Do One Step", [](void* clientData) { 
+	TwAddButton(DUC->g_pTweakBar, "One_Ex", [](void* clientData) { 
 		DiffusionSimulator* simulator = static_cast<DiffusionSimulator*>(clientData);
 		simulator->updateDemo1Grid(simulator->diffuseTemperatureExplicit(0.001f));
 	}, this, "");
+
+	TwAddButton(DUC->g_pTweakBar, "One_Im", [](void* clientData) {
+		DiffusionSimulator* simulator = static_cast<DiffusionSimulator*>(clientData);
+		simulator->updateDemo1Grid(simulator->diffuseTemperatureImplicit(0.001f));
+		}, this, "");
 
 	TwAddVarRW(DUC->g_pTweakBar, "Alpha", TW_TYPE_FLOAT, &m_alpha, "step=0.01   min=0.01");
 
@@ -93,23 +98,25 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	
 	// to be implemented
 	m_demo1_baseGrid = new Grid(m_width, m_height, m_depth);
+	m_demo2_baseGrid = new Grid(m_width, m_height, m_depth);
 
 	// initialize baseGrid
 	for (int zIdx = 0; zIdx < m_depth; zIdx++) {
 		for (int yIdx = 0; yIdx < m_height; yIdx++) {
 			for (int xIdx = 0; xIdx < m_width; xIdx++) {
 				if (!isBoundary(xIdx, yIdx, zIdx, m_demo1_baseGrid->getSize())) {
-					m_demo1_baseGrid->setValue(xIdx, yIdx, zIdx, 1); // initialize grid with 1
+					m_demo1_baseGrid->setValue(xIdx, yIdx, zIdx, 1); // initialize 
+					m_demo2_baseGrid->setValue(xIdx, yIdx, zIdx, 1); 
 				}
 				else {
 					m_demo1_baseGrid->setValue(xIdx, yIdx, zIdx, 0); // keep boundaries 0
+					m_demo2_baseGrid->setValue(xIdx, yIdx, zIdx, 0); 
 				}
 			}
 		}
 	}
 
 	if (m_debug) {
-		m_demo1_baseGrid->debugPrint();
 	}
 
 	//m_demo1_baseGrid = diffuseTemperatureExplicit(.01f);
@@ -119,9 +126,11 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	{
 	case 0:
 		cout << "Explicit solver!\n";
+		m_drawing_grid = m_demo1_baseGrid;
 		break;
 	case 1:
 		cout << "Implicit solver!\n";
+		m_drawing_grid = m_demo2_baseGrid;
 		break;
 	default:
 		cout << "Empty Test!\n";
@@ -153,13 +162,14 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 					float zComponent = oldT->getValue(xIdx, yIdx, zIdx + 1) - 2 * oldT->getValue(xIdx, yIdx, zIdx) + oldT->getValue(xIdx, yIdx, zIdx - 1);
 
 					float cd = (xComponent / deltaXSquared) + (yComponent / deltaYSquared) + (zComponent / deltaZSquared);
-
+	
 					newVal = oldVal + timeStep * m_alpha * cd;
-
+	
 					if (newVal > m_demo1_baseGrid->getMaxTemperature()) {
-						m_demo1_baseGrid->setMaxTemperature(newVal);
+						newT->setMaxTemperature(newVal);
+					} else {
+						newT->setMaxTemperature(m_demo1_baseGrid->getMaxTemperature());
 					}
-
 					//std::cout << newVal << std::endl;
 					newT->setValue(xIdx, yIdx, zIdx, newVal);
 				}
@@ -187,7 +197,10 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 					newVal = oldVal + timeStep * m_alpha * cd;
 
 					if (newVal > m_demo1_baseGrid->getMaxTemperature()) {
-						m_demo1_baseGrid->setMaxTemperature(newVal);
+						newT->setMaxTemperature(newVal);
+					}
+					else {
+						newT->setMaxTemperature(m_demo1_baseGrid->getMaxTemperature());
 					}
 					//std::cout << newVal << std::endl;
 					newT->setValue(xIdx, yIdx, zIdx, newVal);
@@ -196,50 +209,166 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 		}
 	}
 
-
 	if (m_debug) {
 		std::cout << "Update explicit" << std::endl;
 		newT->debugPrint();
 	}
 	//m_demo1_baseGrid = newT;
+	m_drawing_grid = newT;
 	return newT;
 }
 
-void setupB(std::vector<Real>& b) {//add your own parameters
+void setupB(std::vector<Real>& b, Grid* grid) {//add your own parameters
 	// to be implemented
 	//set vector B[sizeX*sizeY]
-	for (int i = 0; i < 25; i++) {
-		b.at(i) = 0;
-	}
+	Vec3 size = grid->getSize();
+
+//	for (unsigned int zIdx = 0; zIdx < size.z; zIdx++) {
+		for (unsigned int yIdx = 0; yIdx < size.y; yIdx++) {
+			for (unsigned int xIdx = 0; xIdx < size.x; xIdx++) {
+				unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
+				b.at(idx) = grid->getValue(xIdx, yIdx, 0);
+			}
+		}
+//	}
+
 }
 
-void fillT() {//add your own parameters
+Grid* fillT(std::vector<Real>& x, Grid* grid) {//add your own parameters
 	// to be implemented
 	//fill T with solved vector x
 	//make sure that the temperature in boundary cells stays zero
+	Vec3 size = grid->getSize();
+	Grid* newT = new Grid(size.x, size.y, size.z);
+	if (size.z >= 3) {
+		for (int zIdx = 1; zIdx < size.z - 1; zIdx++) {
+			for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+				for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
+					unsigned int idx = size.x * size.y * zIdx + size.x * yIdx + xIdx;
+					float t = x.at(idx);
+					newT->setValue(xIdx, yIdx, zIdx, t);
+
+					if (x.at(idx) > grid->getMaxTemperature()) {
+						newT->setMaxTemperature(t);
+					}
+					else {
+						newT->setMaxTemperature(grid->getMaxTemperature());
+					}
+				}
+			}
+		}
+	}
+	else {
+		//for (int zIdx = 0; zIdx < size.z; zIdx++) {
+			for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+				for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
+					unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
+					float t = x.at(idx);
+					newT->setValue(xIdx, yIdx, 0, t);
+
+					if (x.at(idx) > grid->getMaxTemperature()) {
+						newT->setMaxTemperature(t);
+					}
+					else {
+						newT->setMaxTemperature(grid->getMaxTemperature());
+					}
+				}
+			}
+		//}
+	}
+	return newT;
 }
 
-void setupA(SparseMatrix<Real>& A, double factor) {//add your own parameters
+void setupA(SparseMatrix<Real>& A, double timeStep, Grid* grid, float m_alpha) {//add your own parameters
 	// to be implemented
 	//setup Matrix A[sizeX*sizeY*sizeZ, sizeX*sizeY*sizeZ]
 	// set with:  A.set_element( index1, index2 , value );
 	// if needed, read with: A(index1, index2);
 	// avoid zero rows in A -> set the diagonal value for boundary cells to 1.0
-	for (int i = 0; i < 25; i++) {
-			A.set_element(i, i, 1); // set diagonal
+	Vec3 size = grid->getSize();
+
+	float deltaXSquared = 1 / pow(size.x, 2);
+	float deltaYSquared = 1 / pow(size.y, 2);
+	float deltaZSquared = 1 / pow(size.z, 2);
+
+	float FX = m_alpha * timeStep * deltaXSquared;
+	float FY = m_alpha * timeStep * deltaYSquared;
+	float FZ = m_alpha * timeStep * deltaZSquared;
+	std::cout << "Test 0" << std::endl;
+
+	//for (unsigned int zIdx = 0; zIdx < size.z; zIdx++) {
+		for (unsigned int yIdx = 0; yIdx < size.y; yIdx++) {
+			for (unsigned int xIdx = 0; xIdx < size.x; xIdx++) {
+				if (xIdx == 0 || yIdx == 0 || xIdx == size.x - 1 || yIdx == size.y - 1) {
+					A.set_element(xIdx, yIdx, 0);
+
+					if (xIdx == yIdx) {
+						A.set_element(xIdx, xIdx, 1);
+					}
+				}
+				else {
+					unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
+
+					unsigned int idx_x_l = idx - 1;
+					unsigned int idx_x_r = idx + 1;
+
+					unsigned int idx_y_l = idx - size.x;
+					unsigned int idx_y_r = idx + size.x;
+
+					//unsigned int idx_z_l = idx - size.x * size.y;
+					//unsigned int idx_z_r = idx + size.x * size.y;
+
+					if (idx_x_l >= 0) {
+						A.set_element(idx, idx_x_l, -FX);
+					}
+					if (idx_x_r < A.n) {
+						A.set_element(idx, idx_x_r, -FX);
+					}
+
+					if (idx_y_l >= 0) {
+						A.set_element(idx, idx_y_l, -FY);
+					}
+					if (idx_y_r < A.n) {
+						A.set_element(idx, idx_y_r, -FY);
+					}
+
+					//if (idx_z_l >= 0) {
+					//	A.set_element(idx, idx_z_l, -FZ);
+					//}
+					//if (idx_z_r < A.n) {
+					//	A.set_element(idx, idx_z_r, -FZ);
+					//}
+
+					if (idx >= 0 && idx < A.n)
+						A.set_element(idx, idx, 1 + 2 * (FX + FY + FZ));
+				}
+			}
+		}
+	//}
+	std::cout << "Test 1" << std::endl;
+
+	for each (std::vector<int> v in A.index) {
+		for each (int i in v) {
+			std::cout << i << std::endl;
+		}
 	}
+	//for (int i = 0; i <16; i++)
+	//for (int j = 0; j < size.y; j++)
+	//std::cout << A.value[1][i] << std::endl;
 }
 
 
-void DiffusionSimulator::diffuseTemperatureImplicit() {//add your own parameters
+Grid* DiffusionSimulator::diffuseTemperatureImplicit(float timeStep) {//add your own parameters
 	// solve A T = b
 	// to be implemented
-	const int N = 25;//N = sizeX*sizeY*sizeZ
+	Vec3 size = m_demo2_baseGrid->getSize();
+	const int N = size.x * size.y * size.z;//N = sizeX*sizeY*sizeZ
 	SparseMatrix<Real> *A = new SparseMatrix<Real> (N);
 	std::vector<Real> *b = new std::vector<Real>(N);
+	A->zero();
 
-	setupA(*A, 0.1);
-	setupB(*b);
+	setupA(*A, timeStep, m_demo2_baseGrid, m_alpha);
+	setupB(*b, m_demo2_baseGrid);
 
 	// perform solve
 	Real pcg_target_residual = 1e-05;
@@ -256,10 +385,17 @@ void DiffusionSimulator::diffuseTemperatureImplicit() {//add your own parameters
 	// preconditioners: 0 off, 1 diagonal, 2 incomplete cholesky
 	solver.solve(*A, *b, x, ret_pcg_residual, ret_pcg_iterations, 0);
 	// x contains the new temperature values
-	fillT();//copy x to T
+	Grid* newT = fillT(x, m_demo2_baseGrid);
+	m_drawing_grid = newT;
+
+	newT->debugPrint();
+
+	return newT;//copy x to T
 }
 
-
+float DiffusionSimulator::getAlpha() {
+	return m_alpha;
+}
 
 void DiffusionSimulator::simulateTimestep(float timeStep)
 {
@@ -271,7 +407,7 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 		m_demo1_baseGrid = diffuseTemperatureExplicit(timeStep);
 		break;
 	case 1:
-		diffuseTemperatureImplicit();
+		//m_demo2_baseGrid = diffuseTemperatureImplicit(timeStep);
 		break;
 	}
 }
@@ -307,7 +443,7 @@ void DiffusionSimulator::drawObjects(Grid *grid)
 
 void DiffusionSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 {
-	drawObjects(m_demo1_baseGrid);
+	drawObjects(m_drawing_grid);
 }
 
 void DiffusionSimulator::onClick(int x, int y)

@@ -105,11 +105,15 @@ public:
 	// Specific Functions
 	void drawObjects(Grid* grid);
 	Grid* diffuseTemperatureExplicit(float timeStep);
-	void diffuseTemperatureImplicit();
-	
+	Grid* diffuseTemperatureImplicit(float timeStep);
+
 	bool isBoundary(int xIdx, int yIdx, int zIdx, Vec3 size);
 
+	unsigned int checkOutOfBoundary(Grid* g, unsigned int index);
+
 	void updateDemo1Grid(Grid* grid);
+
+	float getAlpha();
 private:
 	// Attributes
 	Vec3  m_vfMovableObjectPos;
@@ -128,8 +132,11 @@ private:
 
 
 	Grid* m_demo1_baseGrid;
-	Grid* m_demo1_updateGrid;
-	float m_alpha = 0.3f;
+	Grid* m_demo2_baseGrid;
+
+	Grid* m_drawing_grid;
+
+	float m_alpha = 0.003f;
 };
 
 #endif
