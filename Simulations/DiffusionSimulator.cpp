@@ -26,10 +26,10 @@ void Grid::iterate(std::function<void(int, int, float, float, float, float, floa
 		for (int col = 0; col < field[row].size(); col++)
 		{
 			float here = field[row][col];
-			float left  = row ==         0        ? 0 : field[row - 1][col];
-			float right = row == field.size() - 1 ? 0 : field[row + 1][col];
-			float below = col == field[row].size() - 1 ? 0 : field[row][col + 1];
-			float above = col ==         0        ? 0 : field[row][col - 1];
+			float left = col == 0 ? 0 : field[row][col - 1];
+			float right = col == field[row].size() - 1 ? 0 : field[row][col + 1];
+			float below = row == 0 ? 0 : field[row - 1][col];
+			float above = row == field.size() - 1 ? 0 : field[row + 1][col];
 			f(row, col, here, left, right, below, above);
 		}
 	}
