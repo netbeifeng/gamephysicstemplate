@@ -3,6 +3,7 @@
 
 #include "Simulator.h"
 #include "vectorbase.h"
+#include "pcgsolver.h"
 
 //impement your own grid class for saving grid data
 class Grid {

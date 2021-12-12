@@ -1,5 +1,4 @@
 #include "DiffusionSimulator.h"
-#include "pcgsolver.h"
 using namespace std;
 
 Grid::Grid(int height, int width) {
