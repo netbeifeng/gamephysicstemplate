@@ -10,9 +10,14 @@ class Grid {
 public:
 	// Construtors
 	Grid(int height = 16, int width = 16);
+	void setTemp(int, int, float);
+
 	void iterate(std::function<void(int,int,float)>);
 	void iterate(std::function<void(int, int, float, float, float, float, float)>);
-	void setTemp(int, int, float);
+
+	vector<Real> setupB(float, float);
+	SparseMatrix<Real> setupA(float, float);
+	void fillT(vector<Real>);
 
 private:
 	// Attributes
@@ -39,7 +44,7 @@ public:
 	// Specific Functions
 	void drawObjects();
 	Grid* diffuseTemperatureExplicit(float);
-	void diffuseTemperatureImplicit();
+	void diffuseTemperatureImplicit(float);
 
 private:
 	// Attributes

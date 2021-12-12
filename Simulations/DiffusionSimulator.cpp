@@ -88,6 +88,14 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 		break;
 	case 1:
 		cout << "Implicit solver!\n";
+		T = new Grid();
+		for (int row = 4; row < 14; row++)
+		{
+			for (int col = 0; col < 4; col++)
+			{
+				T->setTemp(row, col, 50.0f);
+			}
+		}
 		break;
 	default:
 		cout << "Empty Test!\n";
@@ -110,41 +118,68 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {
 	return newT;
 }
 
-void setupB(std::vector<Real>& b) {//add your own parameters
-	// to be implemented
-	//set vector B[sizeX*sizeY]
-	for (int i = 0; i < 25; i++) {
-		b.at(i) = 0;
-	}
+vector<Real> Grid::setupB(float timeStep, float factor) {
+	vector<Real> b;
+
+	this->iterate([&](int row, int col, float here, float left, float right, float below, float above) {
+		b.push_back((here / timeStep + 0.5 * ((left + right - 2 * here) + (above + below - 2 * here)))/factor);
+		});
+
+	return b;
 }
 
-void fillT() {//add your own parameters
+void Grid::fillT(vector<Real> x) {
 	// to be implemented
 	//fill T with solved vector x
 	//make sure that the temperature in boundary cells stays zero
+	int width = field[0].size();
+	int row, col;
+	for (int i = 0; i < x.size(); i++)
+	{
+		row = i / width;
+		col = i % width;
+		field[row][col] = x[i];
+	}
 }
 
-void setupA(SparseMatrix<Real>& A, double factor) {//add your own parameters
+SparseMatrix<Real> Grid::setupA(float timeStep, float factor) {
+	size_t height = field.size();
+	size_t width = field[0].size();
+	SparseMatrix<Real> A(height * width);
+
 	// to be implemented
 	//setup Matrix A[sizeX*sizeY*sizeZ, sizeX*sizeY*sizeZ]
 	// set with:  A.set_element( index1, index2 , value );
 	// if needed, read with: A(index1, index2);
 	// avoid zero rows in A -> set the diagonal value for boundary cells to 1.0
-	for (int i = 0; i < 25; i++) {
-			A.set_element(i, i, 1); // set diagonal
+	for (int i = 0; i < height * width; i++) {
+		A.set_element(i, i, 1); // set diagonal
 	}
+
+	auto convert = [=](int row, int col) {return width * row + col; };
+
+	int matrix_row;
+	this->iterate([&](int row, int col, float _) {
+		matrix_row = convert(row, col);
+		if (col > 0) 		// Left
+			A.set_element(matrix_row, convert(row, col - 1), -0.5f / factor);
+		if (col < width - 1) // Right
+			A.set_element(matrix_row, convert(row, col + 1), -0.5f / factor);
+		if (row > 0)        // Above
+			A.set_element(matrix_row, convert(row - 1, col), -0.5f / factor);
+		if (row < height - 1) // Right
+			A.set_element(matrix_row, convert(row + 1, col), -0.5f / factor);
+		});
+
+	return A;
 }
 
 
-void DiffusionSimulator::diffuseTemperatureImplicit() {//add your own parameters
+void DiffusionSimulator::diffuseTemperatureImplicit(float timeStep) {//add your own parameters
 	// solve A T = b
-	// to be implemented
-	const int N = 25;//N = sizeX*sizeY*sizeZ
-	SparseMatrix<Real> *A = new SparseMatrix<Real> (N);
-	std::vector<Real> *b = new std::vector<Real>(N);
-
-	setupA(*A, 0.1);
-	setupB(*b);
+	float factor = 1 / timeStep + 2; // 1 / timeStep + 1 / (d_x * d_x) + 1 / (d_y * d_y);
+	SparseMatrix<Real> A = T->setupA(timeStep, factor);
+	std::vector<Real> b = T->setupB(timeStep, factor);
 
 	// perform solve
 	Real pcg_target_residual = 1e-05;
@@ -155,13 +190,12 @@ void DiffusionSimulator::diffuseTemperatureImplicit() {//add your own parameters
 	SparsePCGSolver<Real> solver;
 	solver.set_solver_parameters(pcg_target_residual, pcg_max_iterations, 0.97, 0.25);
 
-	std::vector<Real> x(N);
-	for (int j = 0; j < N; ++j) { x[j] = 0.; }
+	std::vector<Real> x(b.size(), 0);
 
 	// preconditioners: 0 off, 1 diagonal, 2 incomplete cholesky
-	solver.solve(*A, *b, x, ret_pcg_residual, ret_pcg_iterations, 0);
+	solver.solve(A, b, x, ret_pcg_residual, ret_pcg_iterations, 0);
 	// x contains the new temperature values
-	fillT();//copy x to T
+	T->fillT(x);//copy x to T
 }
 
 
@@ -176,7 +210,7 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 		T = diffuseTemperatureExplicit(timeStep);
 		break;
 	case 1:
-		diffuseTemperatureImplicit();
+		diffuseTemperatureImplicit(timeStep);
 		break;
 	}
 }
