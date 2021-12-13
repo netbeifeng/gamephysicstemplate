@@ -222,11 +222,11 @@ void setupB(std::vector<Real>& b, Grid* grid) {//add your own parameters
 	// to be implemented
 	//set vector B[sizeX*sizeY]
 	Vec3 size = grid->getSize();
-
 //	for (unsigned int zIdx = 0; zIdx < size.z; zIdx++) {
-		for (unsigned int yIdx = 0; yIdx < size.y; yIdx++) {
-			for (unsigned int xIdx = 0; xIdx < size.x; xIdx++) {
+		for (unsigned int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+			for (unsigned int xIdx = 1; xIdx < size.x - 1; xIdx++) {
 				unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
+				//std::cout << idx << std::endl;
 				b.at(idx) = grid->getValue(xIdx, yIdx, 0);
 			}
 		}
@@ -264,6 +264,7 @@ Grid* fillT(std::vector<Real>& x, Grid* grid) {//add your own parameters
 				for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
 					unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
 					float t = x.at(idx);
+					//std::cout << "idx = " << idx << ", t = " << t << std::endl;
 					newT->setValue(xIdx, yIdx, 0, t);
 
 					if (x.at(idx) > grid->getMaxTemperature()) {
@@ -293,18 +294,26 @@ void setupA(SparseMatrix<Real>& A, double timeStep, Grid* grid, float m_alpha) {
 
 	float FX = m_alpha * timeStep * deltaXSquared;
 	float FY = m_alpha * timeStep * deltaYSquared;
-	float FZ = m_alpha * timeStep * deltaZSquared;
-	std::cout << "Test 0" << std::endl;
+	float FZ = 0;
+	if (size.z < 3)
+		FZ = m_alpha * timeStep * deltaZSquared;
+	//std::cout << "Test 0" << std::endl;
 
 	//for (unsigned int zIdx = 0; zIdx < size.z; zIdx++) {
 		for (unsigned int yIdx = 0; yIdx < size.y; yIdx++) {
 			for (unsigned int xIdx = 0; xIdx < size.x; xIdx++) {
+
 				if (xIdx == 0 || yIdx == 0 || xIdx == size.x - 1 || yIdx == size.y - 1) {
+					//std::cout << "TEST OK UF" << std::endl;
 					A.set_element(xIdx, yIdx, 0);
+					//std::cout << "TEST OK UF" << std::endl;
 
 					if (xIdx == yIdx) {
+						//std::cout << "TEST OK 1UF" << std::endl;
 						A.set_element(xIdx, xIdx, 1);
 					}
+					//std::cout << "TEST OK UF" << std::endl;
+
 				}
 				else {
 					unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
@@ -312,25 +321,22 @@ void setupA(SparseMatrix<Real>& A, double timeStep, Grid* grid, float m_alpha) {
 					unsigned int idx_x_l = idx - 1;
 					unsigned int idx_x_r = idx + 1;
 
-					unsigned int idx_y_l = idx - size.x;
-					unsigned int idx_y_r = idx + size.x;
+					//unsigned int idx_y_l = idx - size.x;
+					//unsigned int idx_y_r = idx + size.x;
 
 					//unsigned int idx_z_l = idx - size.x * size.y;
 					//unsigned int idx_z_r = idx + size.x * size.y;
 
-					if (idx_x_l >= 0) {
 						A.set_element(idx, idx_x_l, -FX);
-					}
-					if (idx_x_r < A.n) {
+						//std::cout << A(idx, idx_x_l) << std::endl;
 						A.set_element(idx, idx_x_r, -FX);
-					}
+						//std::cout << A(idx, idx_x_r) << std::endl;
 
-					if (idx_y_l >= 0) {
-						A.set_element(idx, idx_y_l, -FY);
-					}
-					if (idx_y_r < A.n) {
-						A.set_element(idx, idx_y_r, -FY);
-					}
+						//A.set_element(idx, idx_y_l, -FY);
+						//std::cout << A(idx, idx_y_l) << std::endl;
+						//A.set_element(idx, idx_y_r, -FY);
+						//std::cout << A(idx, idx_y_r) << std::endl;
+					
 
 					//if (idx_z_l >= 0) {
 					//	A.set_element(idx, idx_z_l, -FZ);
@@ -339,19 +345,25 @@ void setupA(SparseMatrix<Real>& A, double timeStep, Grid* grid, float m_alpha) {
 					//	A.set_element(idx, idx_z_r, -FZ);
 					//}
 
-					if (idx >= 0 && idx < A.n)
 						A.set_element(idx, idx, 1 + 2 * (FX + FY + FZ));
+						//std::cout << A(idx, idx) << std::endl;
 				}
 			}
 		}
-	//}
-	std::cout << "Test 1" << std::endl;
 
-	for each (std::vector<int> v in A.index) {
-		for each (int i in v) {
-			std::cout << i << std::endl;
-		}
-	}
+		//for (int i = 0; i < A.n / size.x; i++) {
+		//	for (int j = 0; i < A.n / size.y; i++) {
+		//		std::cout << A(i, j) << std::endl;
+		//	}
+		//}
+	//}
+	//std::cout << "Test 1" << std::endl;
+
+	//for each (std::vector<int> v in A.index) {
+	//	for each (int i in v) {
+	//		std::cout << i << std::endl;
+	//	}
+	//}
 	//for (int i = 0; i <16; i++)
 	//for (int j = 0; j < size.y; j++)
 	//std::cout << A.value[1][i] << std::endl;
@@ -361,13 +373,15 @@ void setupA(SparseMatrix<Real>& A, double timeStep, Grid* grid, float m_alpha) {
 Grid* DiffusionSimulator::diffuseTemperatureImplicit(float timeStep) {//add your own parameters
 	// solve A T = b
 	// to be implemented
+
 	Vec3 size = m_demo2_baseGrid->getSize();
 	const int N = size.x * size.y * size.z;//N = sizeX*sizeY*sizeZ
 	SparseMatrix<Real> *A = new SparseMatrix<Real> (N);
 	std::vector<Real> *b = new std::vector<Real>(N);
-	A->zero();
 
+	//A->clear();
 	setupA(*A, timeStep, m_demo2_baseGrid, m_alpha);
+
 	setupB(*b, m_demo2_baseGrid);
 
 	// perform solve
@@ -385,6 +399,7 @@ Grid* DiffusionSimulator::diffuseTemperatureImplicit(float timeStep) {//add your
 	// preconditioners: 0 off, 1 diagonal, 2 incomplete cholesky
 	solver.solve(*A, *b, x, ret_pcg_residual, ret_pcg_iterations, 0);
 	// x contains the new temperature values
+
 	Grid* newT = fillT(x, m_demo2_baseGrid);
 	m_drawing_grid = newT;
 
@@ -407,7 +422,7 @@ void DiffusionSimulator::simulateTimestep(float timeStep)
 		m_demo1_baseGrid = diffuseTemperatureExplicit(timeStep);
 		break;
 	case 1:
-		//m_demo2_baseGrid = diffuseTemperatureImplicit(timeStep);
+		m_demo2_baseGrid = diffuseTemperatureImplicit(timeStep);
 		break;
 	}
 }
