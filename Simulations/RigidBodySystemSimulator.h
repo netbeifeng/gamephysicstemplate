@@ -19,7 +19,7 @@ public:
 	void drawFrame(ID3D11DeviceContext* pd3dImmediateContext);
 	void notifyCaseChanged(int testCase);
 	void externalForcesCalculations(float timeElapsed);
-	void simulateTimestep(float timeStep);
+	void simulateTimestep(float timeStep, int m, int n);
 	void simulateCollision();
 	void onClick(int x, int y);
 	void onMouse(int x, int y);

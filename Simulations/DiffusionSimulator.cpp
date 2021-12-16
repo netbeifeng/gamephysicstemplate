@@ -79,8 +79,8 @@ void DiffusionSimulator::notifyCaseChanged(int testCase)
 	}
 }
 
-Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your own parameters
-	Grid* newG = new Grid(16, 16, 0.5);
+Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep, int n, int m) {//add your own parameters
+	Grid* newG = new Grid(n, m, 0.5);
 	// to be implemented
 	//make sure that the temperature in boundary cells stays zero
 
@@ -187,14 +187,27 @@ void DiffusionSimulator::diffuseTemperatureImplicit(float timeStep) {//add your 
 
 
 
-void DiffusionSimulator::simulateTimestep(float timeStep)
+void DiffusionSimulator::simulateTimestep(float timeStep, int m, int n)
 {
 	// to be implemented
 	// update current setup for each frame
+
+	// change m or n, reset a grid
+	if (m != G->m || n != G->n) {
+		G = new Grid(n, m, 0.5);
+		for (int i = 1; i <= 4; i++)
+		{
+			for (int j = 1; j <= 4; j++)
+			{
+				G->temperature[i][j] = 100;
+			}
+		}
+	}
+
 	switch (m_iTestCase)
 	{
 	case 0:
-		G = diffuseTemperatureExplicit(timeStep);
+		G = diffuseTemperatureExplicit(timeStep, n, m);
 		break;
 	case 1:
 		diffuseTemperatureImplicit(timeStep);

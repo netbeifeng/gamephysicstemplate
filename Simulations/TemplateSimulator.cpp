@@ -81,7 +81,7 @@ void TemplateSimulator::externalForcesCalculations(float timeElapsed)
 	}
 }
 
-void TemplateSimulator::simulateTimestep(float timeStep)
+void TemplateSimulator::simulateTimestep(float timeStep, int m, int n)
 {
 	// update current setup for each frame
 	switch (m_iTestCase)

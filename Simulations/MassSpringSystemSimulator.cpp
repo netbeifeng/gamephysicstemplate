@@ -239,7 +239,7 @@ void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
 
 }
 
-void MassSpringSystemSimulator::simulateTimestep(float timeStep)
+void MassSpringSystemSimulator::simulateTimestep(float timeStep,int m, int n)
 {
 	switch (m_iTestCase)
 	{

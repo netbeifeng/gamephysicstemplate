@@ -122,7 +122,7 @@ void RigidBodySystemSimulator::externalForcesCalculations(float timeElapsed)
 	}
 }
 
-void RigidBodySystemSimulator::simulateTimestep(float timeStep)
+void RigidBodySystemSimulator::simulateTimestep(float timeStep, int m, int n)
 {
 	switch (m_iTestCase)
 	{

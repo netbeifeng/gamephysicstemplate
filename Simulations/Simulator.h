@@ -50,7 +50,7 @@ public:
 	This Function is used to simulate one step of the simulation called by the simulator enviroment
 	input: timeStep is the time step of the stimulation
 	*/
-	virtual void simulateTimestep(float timeStep)= 0;
+	virtual void simulateTimestep(float timeStep, int m, int n)= 0;
 	/*
 	This Function is used to notify the simulator that the scene test case is changed 
 	so that the needed changes can be handed here
