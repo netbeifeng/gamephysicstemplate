@@ -208,9 +208,6 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Simulations\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\AntTweakBar\src\AntTweakBar_2017.vcxproj">
       <Project>{b99e1fa1-c30a-45f2-9d57-9e9c21b2df42}</Project>
     </ProjectReference>
@@ -232,6 +229,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\SimulatorTester\SimulatorTester.vcxproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Simulations\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

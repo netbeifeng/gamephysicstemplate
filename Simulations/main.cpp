@@ -22,7 +22,7 @@ using namespace GamePhysics;
 
 //#define TEMPLATE_DEMO
 //#define MASS_SPRING_SYSTEM
-#define RIGID_BODY_SYSTEM
+//#define RIGID_BODY_SYSTEM
 //#define SPH_SYSTEM
 #define DIFFUSION_SYSTEM
 
@@ -33,7 +33,7 @@ using namespace GamePhysics;
 //#include "MassSpringSystemSimulator.h"
 #endif
 #ifdef RIGID_BODY_SYSTEM
-#include "RigidBodySystemSimulator.h"
+//#include "RigidBodySystemSimulator.h"
 #endif
 #ifdef SPH_SYSTEM
 //#include "SPHSystemSimulator.h"
@@ -373,7 +373,7 @@ int main(int argc, char* argv[])
 	g_pSimulator= new RigidBodySystemSimulator();
 #endif
 #ifdef SPH_SYSTEM
-	//g_pSimulator= new SPHSystemSimulator();
+	g_pSimulator= new SPHSystemSimulator();
 #endif
 #ifdef DIFFUSION_SYSTEM
 	g_pSimulator= new DiffusionSimulator();

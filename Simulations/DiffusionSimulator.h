@@ -8,11 +8,16 @@
 class Grid {
 public:
 	// Construtors
-	Grid();
+	Grid(int n, int m, float alpha);
 
 
-private:
+public:
 	// Attributes
+	// default delta x = delta y = 1
+	int n;  // n cols
+	int m;  // m rows
+	float alpha;
+	vector<vector<float>> temperature;
 };
 
 
@@ -34,8 +39,11 @@ public:
 	void onMouse(int x, int y);
 	// Specific Functions
 	void drawObjects();
-	Grid* diffuseTemperatureExplicit();
-	void diffuseTemperatureImplicit();
+	Grid* diffuseTemperatureExplicit(float timeStep);
+	void diffuseTemperatureImplicit(float timeStep);
+
+	void setupB(std::vector<Real>& b);
+	void fillT(vector<Real> x);
 
 private:
 	// Attributes
@@ -45,7 +53,10 @@ private:
 	Point2D m_mouse;
 	Point2D m_trackmouse;
 	Point2D m_oldtrackmouse;
-	Grid *T; //save results of every time step
+	//save results of every time step
+	// use *T because Grid *T = new Grid() in C++
+	// it stores one grid, not all the grids in the simulation
+	Grid *G; 
 };
 
 #endif
