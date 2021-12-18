@@ -147,9 +147,9 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 	Grid* newT = new Grid(size.x, size.y, size.z); // 1 ~ 14 available
 
 	//std::cout << size << std::endl;
-	float deltaXSquared = 1 / pow(size.x, 2);
-	float deltaYSquared = 1 / pow(size.y, 2);
-	float deltaZSquared = 1 / pow(size.z, 2);
+	float deltaXSquared = 1;
+	float deltaYSquared = 1;
+	float deltaZSquared = 1;
 
 	if (size.z >= 3) {
 		for (int zIdx = 1; zIdx < size.z - 1; zIdx++) {
@@ -217,20 +217,80 @@ Grid* DiffusionSimulator::diffuseTemperatureExplicit(float timeStep) {//add your
 	m_drawing_grid = newT;
 	return newT;
 }
+int ConvertToOneD(int i, int j, int m) {
+	return i * m + j;
+}
+void setupB_Guanyu(std::vector<Real>& b, Grid* G) {//add your own parameters
+	// to be implemented
+	//set vector B[sizeX*sizeY]
+	Vec3 size = G->getSize();
+	for (int i = 0; i < size.y; i++) {
+		for (int j = 0; j < size.x; j++) {
+			int index = ConvertToOneD(i, j, size.x);
+			b.at(index) = G->getValue(i, j, 0);
+		}
+	}
+}
+
+Grid* fillT_Guanyu(vector<Real> x, Grid* G) {//add your own parameters
+	// to be implemented
+	//fill T with solved vector x
+	//make sure that the temperature in boundary cells stays zero
+	Vec3 size = G->getSize();
+
+	Grid* newT = new Grid(size.x, size.y, size.z);
+	for (int i = 0; i < x.size(); i++) {
+		int m = G->getSize().x;
+		int col = i / m;
+		int row = i % m;
+		newT->setValue(col,row,0,x[i]);
+	}
+	return newT;
+}
+
+void setupA_Guanyu(SparseMatrix<Real>& A, double factor, int n, int m) {//add your own parameters
+	// to be implemented
+	//setup Matrix A[sizeX*sizeY*sizeZ, sizeX*sizeY*sizeZ]
+	// set with:  A.set_element( index1, index2 , value );
+	// if needed, read with: A(index1, index2);
+	// avoid zero rows in A -> set the diagonal value for boundary cells to 1.0
+
+	for (int i = 0; i < n * m; i++) {
+		A.set_element(i, i, 1); // set diagonal
+	}
+
+	for (int i = 0; i < n * m; i++) {
+		int col = i / m;
+		int row = i % m;
+
+		// only operate on 14x14 area
+		if (col >= 1 && col <= (n - 2) && row >= 1 && row <= (m - 2)) {
+			int index1 = ConvertToOneD(col + 1, row, m);
+			int index2 = ConvertToOneD(col - 1, row, m);
+			int index3 = ConvertToOneD(col, row + 1, m);
+			int index4 = ConvertToOneD(col, row - 1, m);
+
+			A.set_element(i, i, 1 + 4 * factor);
+			A.set_element(i, index1, -factor);
+			A.set_element(i, index2, -factor);
+			A.set_element(i, index3, -factor);
+			A.set_element(i, index4, -factor);
+		}
+	}
+}
 
 void setupB(std::vector<Real>& b, Grid* grid) {//add your own parameters
 	// to be implemented
 	//set vector B[sizeX*sizeY]
 	Vec3 size = grid->getSize();
-//	for (unsigned int zIdx = 0; zIdx < size.z; zIdx++) {
-		for (unsigned int yIdx = 1; yIdx < size.y - 1; yIdx++) {
-			for (unsigned int xIdx = 1; xIdx < size.x - 1; xIdx++) {
-				unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
-				//std::cout << idx << std::endl;
-				b.at(idx) = grid->getValue(xIdx, yIdx, 0);
+	for (unsigned int zIdx = 0; zIdx < size.z; zIdx++) {
+		for (unsigned int yIdx = 0; yIdx < size.y; yIdx++) {
+			for (unsigned int xIdx = 0; xIdx < size.x; xIdx++) {
+				unsigned int idx = size.x * size.y * zIdx + size.x * yIdx + xIdx;
+				b.at(idx) = grid->getValue(xIdx, yIdx, zIdx);
 			}
 		}
-//	}
+	}
 
 }
 
@@ -240,43 +300,24 @@ Grid* fillT(std::vector<Real>& x, Grid* grid) {//add your own parameters
 	//make sure that the temperature in boundary cells stays zero
 	Vec3 size = grid->getSize();
 	Grid* newT = new Grid(size.x, size.y, size.z);
-	if (size.z >= 3) {
-		for (int zIdx = 1; zIdx < size.z - 1; zIdx++) {
-			for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
-				for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
-					unsigned int idx = size.x * size.y * zIdx + size.x * yIdx + xIdx;
-					float t = x.at(idx);
-					newT->setValue(xIdx, yIdx, zIdx, t);
 
-					if (x.at(idx) > grid->getMaxTemperature()) {
-						newT->setMaxTemperature(t);
-					}
-					else {
-						newT->setMaxTemperature(grid->getMaxTemperature());
-					}
+	for (int zIdx = 0; zIdx < size.z; zIdx++) {
+		for (int yIdx = 0; yIdx < size.y; yIdx++) {
+			for (int xIdx = 0; xIdx < size.x; xIdx++) {
+				unsigned int idx = size.x * size.y * zIdx + size.x * yIdx + xIdx;
+				float t = x.at(idx);
+				newT->setValue(xIdx, yIdx, zIdx, t);
+
+				if (x.at(idx) > grid->getMaxTemperature()) {
+					newT->setMaxTemperature(t);
+				}
+				else {
+					newT->setMaxTemperature(grid->getMaxTemperature());
 				}
 			}
 		}
 	}
-	else {
-		//for (int zIdx = 0; zIdx < size.z; zIdx++) {
-			for (int yIdx = 1; yIdx < size.y - 1; yIdx++) {
-				for (int xIdx = 1; xIdx < size.x - 1; xIdx++) {
-					unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
-					float t = x.at(idx);
-					//std::cout << "idx = " << idx << ", t = " << t << std::endl;
-					newT->setValue(xIdx, yIdx, 0, t);
 
-					if (x.at(idx) > grid->getMaxTemperature()) {
-						newT->setMaxTemperature(t);
-					}
-					else {
-						newT->setMaxTemperature(grid->getMaxTemperature());
-					}
-				}
-			}
-		//}
-	}
 	return newT;
 }
 
@@ -288,85 +329,71 @@ void setupA(SparseMatrix<Real>& A, double timeStep, Grid* grid, float m_alpha) {
 	// avoid zero rows in A -> set the diagonal value for boundary cells to 1.0
 	Vec3 size = grid->getSize();
 
-	float deltaXSquared = 1 / pow(size.x, 2);
-	float deltaYSquared = 1 / pow(size.y, 2);
-	float deltaZSquared = 1 / pow(size.z, 2);
+	float deltaXSquared = 1;
+	float deltaYSquared = 1;
+	float deltaZSquared = 1;
 
 	float FX = m_alpha * timeStep * deltaXSquared;
 	float FY = m_alpha * timeStep * deltaYSquared;
 	float FZ = 0;
-	if (size.z < 3)
+	if (size.z >= 3)
 		FZ = m_alpha * timeStep * deltaZSquared;
-	//std::cout << "Test 0" << std::endl;
+
+	for (unsigned int i = 0; i < size.y * size.x * size.z; i++) {
+		A.set_element(i,i,1);
+	}
 
 	//for (unsigned int zIdx = 0; zIdx < size.z; zIdx++) {
-		for (unsigned int yIdx = 0; yIdx < size.y; yIdx++) {
-			for (unsigned int xIdx = 0; xIdx < size.x; xIdx++) {
-
-				if (xIdx == 0 || yIdx == 0 || xIdx == size.x - 1 || yIdx == size.y - 1) {
-					//std::cout << "TEST OK UF" << std::endl;
-					A.set_element(xIdx, yIdx, 0);
-					//std::cout << "TEST OK UF" << std::endl;
-
-					if (xIdx == yIdx) {
-						//std::cout << "TEST OK 1UF" << std::endl;
-						A.set_element(xIdx, xIdx, 1);
-					}
-					//std::cout << "TEST OK UF" << std::endl;
-
-				}
-				else {
-					unsigned int idx = size.x * size.y * 0 + size.x * yIdx + xIdx;
+	if (size.z < 3) {
+		for (unsigned zIdx = 0; zIdx < size.z; zIdx++) {
+			for (unsigned int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+				for (unsigned int xIdx = 1; xIdx < size.x - 1; xIdx++) {
+					unsigned int idx = size.x * size.y * zIdx + size.x * yIdx + xIdx;
 
 					unsigned int idx_x_l = idx - 1;
 					unsigned int idx_x_r = idx + 1;
 
-					//unsigned int idx_y_l = idx - size.x;
-					//unsigned int idx_y_r = idx + size.x;
+					unsigned int idx_y_a = idx - size.x;
+					unsigned int idx_y_b = idx + size.x;
 
-					//unsigned int idx_z_l = idx - size.x * size.y;
-					//unsigned int idx_z_r = idx + size.x * size.y;
+					A.set_element(idx, idx_x_l, -FX);
+					A.set_element(idx, idx_x_r, -FX);
+					A.set_element(idx, idx_y_a, -FY);
+					A.set_element(idx, idx_y_b, -FY);
+					A.set_element(idx, idx, 1 + 2 * (FX + FY));
 
-						A.set_element(idx, idx_x_l, -FX);
-						//std::cout << A(idx, idx_x_l) << std::endl;
-						A.set_element(idx, idx_x_r, -FX);
-						//std::cout << A(idx, idx_x_r) << std::endl;
-
-						//A.set_element(idx, idx_y_l, -FY);
-						//std::cout << A(idx, idx_y_l) << std::endl;
-						//A.set_element(idx, idx_y_r, -FY);
-						//std::cout << A(idx, idx_y_r) << std::endl;
-					
-
-					//if (idx_z_l >= 0) {
-					//	A.set_element(idx, idx_z_l, -FZ);
-					//}
-					//if (idx_z_r < A.n) {
-					//	A.set_element(idx, idx_z_r, -FZ);
-					//}
-
-						A.set_element(idx, idx, 1 + 2 * (FX + FY + FZ));
-						//std::cout << A(idx, idx) << std::endl;
 				}
 			}
 		}
+	}
+	else {
+		for (unsigned int zIdx = 1; zIdx < size.z - 1; zIdx++) {
+			for (unsigned int yIdx = 1; yIdx < size.y - 1; yIdx++) {
+				for (unsigned int xIdx = 1; xIdx < size.x - 1; xIdx++) {
+					unsigned int idx = size.x * size.y * zIdx + size.x * yIdx + xIdx;
 
-		//for (int i = 0; i < A.n / size.x; i++) {
-		//	for (int j = 0; i < A.n / size.y; i++) {
-		//		std::cout << A(i, j) << std::endl;
-		//	}
-		//}
-	//}
-	//std::cout << "Test 1" << std::endl;
+					unsigned int idx_x_l = idx - 1;
+					unsigned int idx_x_r = idx + 1;
 
-	//for each (std::vector<int> v in A.index) {
-	//	for each (int i in v) {
-	//		std::cout << i << std::endl;
-	//	}
-	//}
-	//for (int i = 0; i <16; i++)
-	//for (int j = 0; j < size.y; j++)
-	//std::cout << A.value[1][i] << std::endl;
+					unsigned int idx_y_a = idx - size.x;
+					unsigned int idx_y_b = idx + size.x;
+
+					unsigned int idx_z_f = idx - size.x * size.y;
+					unsigned int idx_z_r = idx + size.x * size.y;
+
+					A.set_element(idx, idx_x_l, -FX);
+					A.set_element(idx, idx_x_r, -FX);
+					A.set_element(idx, idx_y_a, -FY);
+					A.set_element(idx, idx_y_b, -FY);
+					A.set_element(idx, idx_z_f, -FZ);
+					A.set_element(idx, idx_z_r, -FZ);
+					A.set_element(idx, idx, 1 + 2 * (FX + FY + FZ));
+
+				}
+			}
+		}
+	}
+
 }
 
 
@@ -375,13 +402,15 @@ Grid* DiffusionSimulator::diffuseTemperatureImplicit(float timeStep) {//add your
 	// to be implemented
 
 	Vec3 size = m_demo2_baseGrid->getSize();
-	const int N = size.x * size.y * size.z;//N = sizeX*sizeY*sizeZ
+	const int N = size.x * size.y;//N = sizeX*sizeY*sizeZ
 	SparseMatrix<Real> *A = new SparseMatrix<Real> (N);
 	std::vector<Real> *b = new std::vector<Real>(N);
 
+
+	//setupA_Guanyu(*A, timeStep * m_alpha, size.y, size.x);
 	//A->clear();
 	setupA(*A, timeStep, m_demo2_baseGrid, m_alpha);
-
+	//setupB_Guanyu(*b, m_demo2_baseGrid);
 	setupB(*b, m_demo2_baseGrid);
 
 	// perform solve

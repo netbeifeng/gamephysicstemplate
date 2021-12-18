@@ -22,7 +22,7 @@ public:
 	float getValue(unsigned int x, unsigned int y, unsigned int z) {
 		unsigned int idx = m_width * m_height * z + m_width * y + x;
 		if (idx < 0 || idx >  m_width * m_height * m_depth + m_width * m_height + m_width) {
-			throw std::out_of_range("Index out of boundary");
+			return 0;
 		}
 		return m_values[idx];
 	} 
@@ -30,7 +30,8 @@ public:
 	void setValue(unsigned int x, unsigned int y, unsigned int z, float val) {
 		unsigned int idx = m_width * m_height * z + m_width * y + x;
 		if (idx < 0 || idx >  m_width * m_height * m_depth + m_width * m_height + m_width) {
-			throw std::out_of_range("Index out of boundary");
+			m_values[idx] = 0;
+
 		}
 		m_values[idx] = val;
 	}
