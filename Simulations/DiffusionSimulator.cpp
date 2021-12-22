@@ -225,7 +225,7 @@ void DiffusionSimulator::drawObjects()
 			// assume temperature is in [-5, 100]
 			// map temperature to [0, 1]
 			float diffuseColor = (G->temperature[i][j] - (-5)) / (100 - (-5));
-			DUC->setUpLighting(Vec3(), Vec3(0, 0, 0), 0, Vec3(1, 1, 1) * diffuseColor);
+			DUC->setUpLighting(Vec3(), Vec3(0, 0, 0), 100, Vec3(1, 1, 1) * diffuseColor);
 			Vec3 pos = Vec3(0.1 * (i - (G->n - 1) / 2), 0.1 * (j - (G->m - 1) / 2), 0); // put it to the center
 			DUC->drawSphere(pos, 0.1);
 		}
