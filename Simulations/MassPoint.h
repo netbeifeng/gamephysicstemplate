@@ -22,6 +22,7 @@ public:
 	void integrateWithMidpoint(float, Point*);
 	void initializeLeapFrog(float);
 	void integrateLeapFrog(float);
+	void applyImpulse(float, Vec3);
 
 private:
 	Vec3 position;

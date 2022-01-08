@@ -64,7 +64,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	// Setup for Demos 4 and 5
 	case 0: case 1:
 	{
-		sphere = RigidBodySphere(Vec3(0, 0, 0.5), 0.1);
+		sphere = RigidBodySphere(Vec3(0, 0, 0.5), 0.1, 20);
 		sphere.addAcceleration(Vec3(0, 0, -1000));
 
 		// Construct a "sheet" of points connected with springs,
@@ -157,17 +157,31 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	{
 	case 0:
 		makeMidpointStep(timeStep, Vec3(0, -9, 0));
-		enforceFloorBoundary();
-		sphere.integrate(timeStep);
 		break;
 	case 1:
 		makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
-		enforceFloorBoundary();
-		sphere.integrate(timeStep);
 		break;
 	default:
 		break;
 	}
+	sphere.integrate(timeStep);
+
+	// Collision detection
+	for (Point* p : points)
+	{
+		Vec3 direction = p->getPosition() - sphere.getPosition();
+		Vec3 distance = norm(direction);
+		Vec3 normal = direction / distance;
+
+		Vec3 rel_vel = p->getVelocity() - sphere.getVelocity();
+		if (distance <= sphere.getRadius())
+		{
+			float J = -(1 + sphere.getBounciness()) * dot(rel_vel, normal) / (1/sphere.getMass() + 1/p->getMass());
+			p->applyImpulse(J, normal);
+			sphere.applyImpulse(J, -normal);
+		}
+	}
+	enforceFloorBoundary();
 }
 
 void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)

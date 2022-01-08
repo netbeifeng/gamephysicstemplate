@@ -1,11 +1,11 @@
 #include "RigidBodySphere.h"
 
-RigidBodySphere::RigidBodySphere(Vec3 mid, float rad, float bounce)
+RigidBodySphere::RigidBodySphere(Vec3 mid, float rad, float m, float bounce)
 {
 	position = mid;
 	velocity = Vec3(0, 0, 0);
 	force = Vec3(0, 0, 0);
-	mass = 1;
+	mass = m;
 	radius = rad;
 	bounciness = bounce;
 }

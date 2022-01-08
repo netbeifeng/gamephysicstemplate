@@ -6,7 +6,7 @@ using namespace GamePhysics;
 class RigidBodySphere
 {
 public:
-	RigidBodySphere(Vec3 midpoint = Vec3(0,0,0), float radius = 0.1, float bounciness = 0.9);
+	RigidBodySphere(Vec3 midpoint = Vec3(0,0,0), float radius = 0.1, float mass = 1, float bounciness = 0.9);
 
 	// Gettters
 	Vec3 getPosition() { return position; }

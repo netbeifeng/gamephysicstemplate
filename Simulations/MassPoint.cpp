@@ -104,3 +104,8 @@ void Point::integrateLeapFrog(float timestep)
 	}
 	clearForce();
 }
+
+void Point::applyImpulse(float J, Vec3 colNormal)
+{
+	velocity = velocity + J * colNormal / mass;
+}
