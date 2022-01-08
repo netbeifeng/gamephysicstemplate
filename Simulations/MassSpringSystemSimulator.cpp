@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 1,Demo 2,Demo 3,Demo 4 (Euler),Demo 4 (Midpoint),Demo 5";
+	return "Demo 4 (Euler),Demo 4 (Midpoint),Demo 5";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -59,37 +59,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	// ** Setup Scene ** //
 	switch (testCase)
 	{
-	// Setup for Demos 1-3 (Table 1.1)
-	case 0: case 1: case 2:
-		// * Points * //
-		p0 = Vec3(0, 0, 0);
-		v0 = Vec3(-1, 0, 0);
-		p1 = Vec3(0, 2, 0);
-		v1 = Vec3(1, 0, 0);
-		m0 = 10, m1 = 10;
-
-		// The point objects:
-		pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false);
-		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false);
-
-		// Push points onto the attribute
-		for (auto p : points) { delete p; }
-		points.clear();
-		points.push_back(pt0);
-		points.push_back(pt1);
-
-		// * Spring * //
-		// The spring object:
-		s = Spring(40, 1, 0, 0, 1);
-
-		// Push springs onto the attribute
-		springs.clear();
-		springs.push_back(s);
-
-		break;
-
 	// Setup for Demos 4 and 5
-	case 3: case 4: case 5:
+	case 0: case 1: case 2:
 	{
 		// Construct a "sheet" of points connected with springs,
 		// with a small upward velocity
@@ -151,53 +122,14 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	switch (testCase)
 	{
 		case 0:
-		{
-			cout << "Demo 1 selected.\n\n";
-
-			cout << "Euler: \n";
-			makeEulerStep(0.1, Vec3(0,0,0));
-			cout << "position p1: " << springs[0].getP1(points)->getPosition() << "\n";
-			cout << "position p2: " << springs[0].getP2(points)->getPosition() << "\n";
-			cout << "velocity p1: " << springs[0].getP1(points)->getVelocity() << "\n";
-			cout << "velocity p2: " << springs[0].getP2(points)->getVelocity() << "\n";
-			cout << "\n";
-
-			// Reset scene
-			for (auto p : points) { delete p; }
-			points.clear();
-			pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false);
-			pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false);
-			points.push_back(pt0);
-			points.push_back(pt1);
-
-			cout << "Midpoint: \n";
-			makeMidpointStep(0.1, Vec3(0, 0, 0));
-			cout << "position p1: " << springs[0].getP1(points)->getPosition() << "\n";
-			cout << "position p2: " << springs[0].getP2(points)->getPosition() << "\n";
-			cout << "velocity p1: " << springs[0].getP1(points)->getVelocity() << "\n";
-			cout << "velocity p2: " << springs[0].getP2(points)->getVelocity() << "\n";
-			cout << "\n";
-
-		}
-		break;
-
-		case 1:
-			cout << "Demo 2 selected.\n\n";
-			break;
-
-		case 2:
-			cout << "Demo 3 selected.\n\n";
-			break;
-
-		case 3:
 			cout << "Demo 4 (Euler) selected.\n";
 			break;
 
-		case 4:
+		case 1:
 			cout << "Demo 4 (Midpoint) selected.\n\n";
 			break;
 
-		case 5:
+		case 2:
 			cout << "Demo 5 selected.\n";
 			cout << "Initialized leap-frog assuming a timestep of: " << timestep << ".\n\n";
 			// Initialize velocities
@@ -216,48 +148,21 @@ In Demos 4 and 5, allow the top left corner to be moved.
 Based on the mouse movement during a click, add the resulting difference vector to the current position.
 */
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
-	if (m_iTestCase >= 3 && m_iTestCase <= 5)
-	{
-		// Apply the mouse deltas to point[0] (move along cameras view plane)
-		Point2D mouseDiff;
-		mouseDiff.x = m_trackmouse.x - m_oldtrackmouse.x;
-		mouseDiff.y = m_trackmouse.y - m_oldtrackmouse.y;
-		if (mouseDiff.x != 0 || mouseDiff.y != 0)
-		{
-			Mat4 worldViewInv = Mat4(DUC->g_camera.GetWorldMatrix() * DUC->g_camera.GetViewMatrix());
-			worldViewInv = worldViewInv.inverse();
-			Vec3 inputView = Vec3((float)mouseDiff.x, (float)-mouseDiff.y, 0);
-			Vec3 inputWorld = worldViewInv.transformVectorNormal(inputView);
-			// find a proper scale!
-			float inputScale = 0.000015f;
-			inputWorld = inputWorld * inputScale;
-			// Apply difference vector
-			Vec3 curpos = points[0]->getPosition();
-			points[0]->setPosition(curpos + inputWorld);
-		}
-	}
-
 }
 
 void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 {
 	switch (m_iTestCase)
 	{
-	case 1:
-		makeEulerStep(0.005, Vec3(0, 0, 0));
-		break;
-	case 2:
-		makeMidpointStep(0.005, Vec3(0, 0, 0));
-		break;
-	case 3:
+	case 0:
 		makeEulerStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
-	case 4:
+	case 1:
 		makeMidpointStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
-	case 5:
+	case 2:
 		makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
