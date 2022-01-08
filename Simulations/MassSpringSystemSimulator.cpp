@@ -51,10 +51,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	// Pass argument to the attribute.
 	m_iTestCase = testCase;
 
-	Point* pt0, *pt1;
 	Spring s;
-	float m0, m1;
-	Vec3 p0, p1, v0, v1;
+	Vec3 p0;
 
 	// ** Setup Scene ** //
 	switch (testCase)
