@@ -45,7 +45,6 @@ public:
 	void makeMidpointStep(float, Vec3);
 	void makeLeapFrogStep(float, Vec3);
 	void enforceFloorBoundary();
-	void addGravity(Vec3);
 
 	// Do Not Change
 	void setIntegrator(int integrator) {
