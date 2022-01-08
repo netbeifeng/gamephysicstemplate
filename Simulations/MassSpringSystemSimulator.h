@@ -41,7 +41,6 @@ public:
 
 	// Additional Functions
 	void applyForcesToCurrentPoints(Vec3 gravity);
-	void makeEulerStep(float, Vec3);
 	void makeMidpointStep(float, Vec3);
 	void makeLeapFrogStep(float, Vec3);
 	void enforceFloorBoundary();

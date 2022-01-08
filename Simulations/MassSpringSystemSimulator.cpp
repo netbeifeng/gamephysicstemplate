@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 4 (Euler),Demo 4 (Midpoint),Demo 5";
+	return "Demo 4 (Midpoint),Demo 5";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -58,7 +58,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	switch (testCase)
 	{
 	// Setup for Demos 4 and 5
-	case 0: case 1: case 2:
+	case 0: case 1:
 	{
 		// Construct a "sheet" of points connected with springs,
 		// with a small upward velocity
@@ -120,14 +120,10 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	switch (testCase)
 	{
 		case 0:
-			cout << "Demo 4 (Euler) selected.\n";
-			break;
-
-		case 1:
 			cout << "Demo 4 (Midpoint) selected.\n\n";
 			break;
 
-		case 2:
+		case 1:
 			cout << "Demo 5 selected.\n";
 			cout << "Initialized leap-frog assuming a timestep of: " << timestep << ".\n\n";
 			// Initialize velocities
@@ -153,14 +149,10 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	switch (m_iTestCase)
 	{
 	case 0:
-		makeEulerStep(timeStep, Vec3(0, -9, 0));
-		enforceFloorBoundary();
-		break;
-	case 1:
 		makeMidpointStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
-	case 2:
+	case 1:
 		makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
 		break;
@@ -180,17 +172,6 @@ void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)
 	for (Spring s : springs)
 	{
 		s.applyElasticForceToPoints(points);
-	}
-}
-
-void MassSpringSystemSimulator::makeEulerStep(float timeStep, Vec3 gravity)
-{
-	applyForcesToCurrentPoints(gravity);
-
-	// Integration
-	for (Point* p : points)
-	{
-		p->integrate(timeStep);
 	}
 }
 
