@@ -39,6 +39,10 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 		DUC->drawLine(s.getP1(points)->getPosition(), Vec3(1, 0, 0), s.getP2(points)->getPosition(), Vec3(0, 1, 0));
 	}
 	DUC->endLine();
+
+	float grey = 0.5;
+	DUC->setUpLighting(Vec3(0, 0, 0), Vec3(1, 1, 1), 0.1, Vec3(grey, grey, grey));
+	DUC->drawSphere(sphere.getPosition(), sphere.getRadius());
 }
 
 /*
@@ -60,6 +64,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	// Setup for Demos 4 and 5
 	case 0: case 1:
 	{
+		sphere = RigidBodySphere();
+
 		// Construct a "sheet" of points connected with springs,
 		// with a small upward velocity
 		// and two points at the top corners being fixed.
@@ -151,10 +157,12 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	case 0:
 		makeMidpointStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
+		sphere.integrate(timeStep);
 		break;
 	case 1:
 		makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
 		enforceFloorBoundary();
+		sphere.integrate(timeStep);
 		break;
 	default:
 		break;
@@ -168,6 +176,7 @@ void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)
 	{
 		p->addAcceleration(gravity);
 	}
+	sphere.addAcceleration(gravity);
 	// Internal forces:
 	for (Spring s : springs)
 	{

@@ -3,6 +3,7 @@
 #include "Simulator.h"
 #include "MassPoint.h"
 #include "Spring.h"
+#include "RigidBodySphere.h"
 
 // Do Not Change
 #define EULER 0
@@ -59,6 +60,7 @@ private:
 	int m_iIntegrator;
 
 	// Additional Data Attributes
+	RigidBodySphere sphere;
 	vector<Point*> points;
 	vector<Spring> springs;
 
