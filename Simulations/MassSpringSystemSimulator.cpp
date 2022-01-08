@@ -64,7 +64,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	// Setup for Demos 4 and 5
 	case 0: case 1:
 	{
-		sphere = RigidBodySphere();
+		sphere = RigidBodySphere(Vec3(0, 0, 0.5), 0.1);
+		sphere.addAcceleration(Vec3(0, 0, -1000));
 
 		// Construct a "sheet" of points connected with springs,
 		// with a small upward velocity
@@ -234,6 +235,13 @@ void MassSpringSystemSimulator::enforceFloorBoundary()
 		if (pos.y < -0.5) {
 			p->setPosition(Vec3(pos.x, -0.5, pos.z));
 		}
+	}
+
+	if (sphere.getPosition().y - sphere.getRadius() < -0.5)
+	{
+		Vec3 n = Vec3(0, 1, 0);
+		float J = -(1 + sphere.getBounciness()) * dot(sphere.getVelocity(), n) * sphere.getMass();
+		sphere.applyImpulse(J, n);
 	}
 }
 

@@ -1,12 +1,13 @@
 #include "RigidBodySphere.h"
 
-RigidBodySphere::RigidBodySphere(Vec3 mid, float rad)
+RigidBodySphere::RigidBodySphere(Vec3 mid, float rad, float bounce)
 {
 	position = mid;
 	velocity = Vec3(0, 0, 0);
 	force = Vec3(0, 0, 0);
 	mass = 1;
 	radius = rad;
+	bounciness = bounce;
 }
 
 void RigidBodySphere::addAcceleration(Vec3 a) {
@@ -21,5 +22,10 @@ void RigidBodySphere::integrate(float timestep)
 	velocity = velocity + timestep * accel;
 
 	clearForce();
+}
+
+void RigidBodySphere::applyImpulse(float J, Vec3 colNormal)
+{
+	velocity = velocity + J * colNormal / mass;
 }
 
