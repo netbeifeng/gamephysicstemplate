@@ -20,6 +20,7 @@ public:
 	void integrate(float);
 	void applyImpulse(float, Vec3);
 	void addForce(Vec3 f) { force += f; }
+	void setPosition(Vec3 p) { position = p; }
 
 private:
 	Vec3 position;

@@ -203,6 +203,7 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 			float J = -(1 + sphere.getBounciness()) * dot(rel_vel, normal) / (1/sphere.getMass() + 1/p->getMass());
 			p->applyImpulse(J, normal);
 			sphere.applyImpulse(J, -normal);
+			p->setPosition(sphere.getPosition() + sphere.getRadius() * normal);
 		}
 	}
 	enforceFloorBoundary();
@@ -253,6 +254,7 @@ void MassSpringSystemSimulator::enforceFloorBoundary()
 		Vec3 n = Vec3(0, 1, 0);
 		float J = -(1 + sphere.getBounciness()) * dot(sphere.getVelocity(), n) * sphere.getMass();
 		sphere.applyImpulse(J, n);
+		sphere.setPosition(Vec3(sphere.getPosition().x, floor + sphere.getRadius(), sphere.getPosition().z));
 	}
 }
 
