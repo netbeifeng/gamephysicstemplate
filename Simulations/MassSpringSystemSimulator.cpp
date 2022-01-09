@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 4 (Midpoint),Demo 5,Vertical";
+	return "Vertical,Horizontal";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -40,6 +40,7 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	}
 	DUC->endLine();
 
+	// Draw sphere
 	float grey = 0.5;
 	DUC->setUpLighting(Vec3(0, 0, 0), Vec3(1, 1, 1), 0.1, Vec3(grey, grey, grey));
 	DUC->drawSphere(sphere.getPosition(), sphere.getRadius());
@@ -61,13 +62,12 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	// ** Setup Scene ** //
 	switch (testCase)
 	{
-	// Setup for Demos 4 and 5
-	case 0: case 1:
+	case 0:
 	{
 		sphere = RigidBodySphere(Vec3(0, 0, 0.5), 0.1, 20);
 		sphere.addAcceleration(Vec3(0, 0, -1000));
 
-		// Construct a "sheet" of points connected with springs,
+		// Construct a vertical "sheet" of points connected with springs,
 		// with a small upward velocity
 		// and two points at the top corners being fixed.
 
@@ -117,7 +117,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		}
 		break;
 	}
-	case 2:
+	case 1:
 	{
 		sphere = RigidBodySphere(Vec3(0, 2, 0), 0.1, 20);
 
@@ -174,49 +174,20 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	}
 	// END Setup Scene //
 
-	// ** Write out to std output ** //
-	// * For Demo 5 (leap-frog), initialize
-	switch (testCase)
-	{
-		case 0:
-			cout << "Demo 4 (Midpoint) selected.\n\n";
-			break;
-
-		case 1:
-			cout << "Demo 5 selected.\n";
-			cout << "Initialized leap-frog assuming a timestep of: " << timestep << ".\n\n";
-			// Initialize velocities
-		case 2:
-			applyForcesToCurrentPoints(Vec3(0, -9, 0));
-			for (Point* p : points) {
-				p->initializeLeapFrog(timestep);
-			}
-			break;
-		default:
-			break;
+	// initialize leap-frog
+	applyForcesToCurrentPoints(Vec3(0, -9, 0));
+	for (Point* p : points) {
+		p->initializeLeapFrog(timestep);
 	}
 }
 
-/*
-In Demos 4 and 5, allow the top left corner to be moved.
-Based on the mouse movement during a click, add the resulting difference vector to the current position.
-*/
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
 }
 
 void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 {
-	switch (m_iTestCase)
-	{
-	case 0:
-		makeMidpointStep(timeStep, Vec3(0, -9, 0));
-		break;
-	case 1: case 2:
-		makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
-		break;
-	default:
-		break;
-	}
+	// Integration
+	makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
 	sphere.integrate(timeStep);
 
 	// Collision detection
@@ -250,37 +221,6 @@ void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)
 	{
 		s.applyElasticForceToPoints(points);
 	}
-}
-
-void MassSpringSystemSimulator::makeMidpointStep(float timeStep, Vec3 gravity) {
-	applyForcesToCurrentPoints(gravity);
-
-	// Integration to midpoint
-	vector<Point*> midpoints;
-	midpoints.clear();
-	for (Point* p : points)
-	{
-		midpoints.push_back(p->integrated(timeStep / 2));
-	}
-
-	// Forces at midpoint
-	// Gravity:
-	for (Point* p : midpoints)
-	{
-		p->addAcceleration(gravity);
-	}
-	// Internal forces:
-	for (Spring s : springs)
-	{
-		s.applyElasticForceToPoints(midpoints);
-	}
-
-	// Calculate result
-	for (size_t i = 0; i < points.size(); i++)
-	{
-		points[i]->integrateWithMidpoint(timeStep, midpoints[i]);
-	}
-	for (auto p : midpoints) { delete p; }
 }
 
 void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep, Vec3 gravity)
