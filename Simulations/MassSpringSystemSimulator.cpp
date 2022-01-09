@@ -43,7 +43,8 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	// Draw sphere
 	float grey = 0.5;
 	DUC->setUpLighting(Vec3(0, 0, 0), Vec3(1, 1, 1), 0.1, Vec3(grey, grey, grey));
-	DUC->drawSphere(sphere.getPosition(), sphere.getRadius());
+	for (RigidBodySphere* s : spheres)
+		DUC->drawSphere(s->getPosition(), s->getRadius());
 }
 
 /*
@@ -64,8 +65,10 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	{
 	case 0:
 	{
-		sphere = RigidBodySphere(Vec3(0, 0, 0.5), 0.1, 20);
-		sphere.addAcceleration(Vec3(0, 0, -1000));
+		for (auto s : spheres) { delete s; }
+		spheres.clear();
+		spheres.push_back(new RigidBodySphere(Vec3(0, 0, 0.5), 0.1, 20));
+		spheres[0]->addAcceleration(Vec3(0, 0, -1000));
 
 		// Construct a vertical "sheet" of points connected with springs,
 		// with a small upward velocity
@@ -119,7 +122,12 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	}
 	case 1:
 	{
-		sphere = RigidBodySphere(Vec3(0, 2, 0), 0.1, 20);
+		for (auto s : spheres) { delete s; }
+		spheres.clear();
+		spheres.push_back(new RigidBodySphere(Vec3(0, 2, 0), 0.1, 20));
+		spheres.push_back(new RigidBodySphere(Vec3(0, 1, 0), 0.05, 5));
+		spheres.push_back(new RigidBodySphere(Vec3(0, 3, 0), 0.3, 1));
+		spheres.push_back(new RigidBodySphere(Vec3(0, 5, 0), 0.1, 99));
 
 		// Construct a "sheet" of points connected with springs,
 		// with fixed corners.
@@ -188,22 +196,24 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 {
 	// Integration
 	makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
-	sphere.integrate(timeStep);
+	for(RigidBodySphere* s : spheres)
+		s->integrate(timeStep);
 
 	// Collision detection
+	for (RigidBodySphere* s : spheres)
 	for (Point* p : points)
 	{
-		Vec3 direction = p->getPosition() - sphere.getPosition();
+		Vec3 direction = p->getPosition() - s->getPosition();
 		Vec3 distance = norm(direction);
 		Vec3 normal = direction / distance;
 
-		Vec3 rel_vel = p->getVelocity() - sphere.getVelocity();
-		if (distance <= sphere.getRadius())
+		Vec3 rel_vel = p->getVelocity() - s->getVelocity();
+		if (distance <= s->getRadius())
 		{
-			float J = -(1 + sphere.getBounciness()) * dot(rel_vel, normal) / (1/sphere.getMass() + 1/p->getMass());
+			float J = -(1 + s->getBounciness()) * dot(rel_vel, normal) / (1/s->getMass() + 1/p->getMass());
 			p->applyImpulse(J, normal);
-			sphere.applyImpulse(J, -normal);
-			p->setPosition(sphere.getPosition() + sphere.getRadius() * normal);
+			s->applyImpulse(J, -normal);
+			p->setPosition(s->getPosition() + s->getRadius() * normal);
 		}
 	}
 	enforceFloorBoundary();
@@ -213,10 +223,10 @@ void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)
 {
 	// Gravity:
 	for (Point* p : points)
-	{
 		p->addAcceleration(gravity);
-	}
-	sphere.addAcceleration(gravity);
+	for (RigidBodySphere* s : spheres)
+		s->addAcceleration(gravity);
+
 	// Internal forces:
 	for (Spring s : springs)
 	{
@@ -249,12 +259,13 @@ void MassSpringSystemSimulator::enforceFloorBoundary()
 	}
 
 	// Sphere
-	if (sphere.getPosition().y - sphere.getRadius() <= floor)
+	for (RigidBodySphere* s : spheres)
+	if (s->getPosition().y - s->getRadius() <= floor)
 	{
 		Vec3 n = Vec3(0, 1, 0);
-		float J = -(1 + sphere.getBounciness()) * dot(sphere.getVelocity(), n) * sphere.getMass();
-		sphere.applyImpulse(J, n);
-		sphere.setPosition(Vec3(sphere.getPosition().x, floor + sphere.getRadius(), sphere.getPosition().z));
+		float J = -(1 + s->getBounciness()) * dot(s->getVelocity(), n) * s->getMass();
+		s->applyImpulse(J, n);
+		s->setPosition(Vec3(s->getPosition().x, floor + s->getRadius(), s->getPosition().z));
 	}
 }
 

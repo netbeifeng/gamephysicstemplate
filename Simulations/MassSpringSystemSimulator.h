@@ -59,7 +59,7 @@ private:
 	int m_iIntegrator;
 
 	// Additional Data Attributes
-	RigidBodySphere sphere;
+	vector<RigidBodySphere*> spheres;
 	vector<Point*> points;
 	vector<Spring> springs;
 
