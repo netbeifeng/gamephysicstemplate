@@ -236,15 +236,19 @@ void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep, Vec3 gravity)
 
 void MassSpringSystemSimulator::enforceFloorBoundary()
 {
+	float floor = -0.9;
+
+	// Points
 	for each (Point* p in points)
 	{
 		Vec3 pos = p->getPosition();
-		if (pos.y < -0.5) {
-			p->setPosition(Vec3(pos.x, -0.5, pos.z));
+		if (pos.y < floor) {
+			p->setPosition(Vec3(pos.x, floor, pos.z));
 		}
 	}
 
-	if (sphere.getPosition().y - sphere.getRadius() < -0.5)
+	// Sphere
+	if (sphere.getPosition().y - sphere.getRadius() <= floor)
 	{
 		Vec3 n = Vec3(0, 1, 0);
 		float J = -(1 + sphere.getBounciness()) * dot(sphere.getVelocity(), n) * sphere.getMass();
