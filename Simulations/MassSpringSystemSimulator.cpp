@@ -184,9 +184,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 
 	// initialize leap-frog
 	applyForcesToCurrentPoints(Vec3(0, -9, 0));
-	for (Point* p : points) {
+	for (Point* p : points)
 		p->initializeLeapFrog(timestep);
-	}
 }
 
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
@@ -229,9 +228,7 @@ void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)
 
 	// Internal forces:
 	for (Spring s : springs)
-	{
 		s.applyElasticForceToPoints(points);
-	}
 }
 
 void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep, Vec3 gravity)
@@ -240,9 +237,7 @@ void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep, Vec3 gravity)
 
 	// Integration
 	for (Point * p : points)
-	{
 		p->integrateLeapFrog(timeStep);
-	}
 }
 
 void MassSpringSystemSimulator::enforceFloorBoundary()
