@@ -79,7 +79,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		// Initial length of the springs
 		double stepSize = 0.1;
 		// Number of points: width*height
-		int width = 8; int height = 8;
+		int width = 12; int height = 12;
 
 		// * Points * //
 		for (auto p : points) { delete p; }
@@ -133,11 +133,11 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		// with fixed corners.
 
 		// Rest length of the springs
-		double restLen = 0.1;
+		double restLen = 0.075;
 		// Initial length of the springs
-		double stepSize = 0.1;
+		double stepSize = 0.075;
 		// Number of points: width*height
-		int width = 8; int height = 8;
+		int width = 12; int height = 12;
 
 		// * Points * //
 		for (auto p : points) { delete p; }
@@ -247,7 +247,7 @@ void MassSpringSystemSimulator::makeLeapFrogStep(float timeStep, Vec3 gravity)
 
 void MassSpringSystemSimulator::enforceFloorBoundary()
 {
-	float floor = -0.9;
+	float floor = -1.0;
 
 	// Points
 	for each (Point* p in points)
