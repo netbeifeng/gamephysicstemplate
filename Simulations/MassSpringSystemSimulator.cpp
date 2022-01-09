@@ -4,7 +4,7 @@
 
 MassSpringSystemSimulator::MassSpringSystemSimulator()
 {
-	setMass(10);
+	setMass(2);
 	setStiffness(10000);
 	setDampingFactor(0.8);
 
@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Demo 4 (Midpoint),Demo 5";
+	return "Demo 4 (Midpoint),Demo 5,Vertical";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -117,6 +117,58 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		}
 		break;
 	}
+	case 2:
+	{
+		sphere = RigidBodySphere(Vec3(0, 2, 0), 0.1, 20);
+
+		// Construct a "sheet" of points connected with springs,
+		// with fixed corners.
+
+		// Rest length of the springs
+		double restLen = 0.1;
+		// Initial length of the springs
+		double stepSize = 0.1;
+		// Number of points: width*height
+		int width = 8; int height = 8;
+
+		// * Points * //
+		for (auto p : points) { delete p; }
+		points.clear();
+		for (double i = 0; i < height; i++)
+		{
+			for (double j = 0; j < width; j++)
+			{
+				// i running from from top=0.5 to bottom,
+				// j running from left=-0.5 to right
+				p0 = Vec3(-0.5 + j * stepSize, 0, 0.5 - i * stepSize);
+				// Push point onto the attribute, with a small upward velocity, and no force;
+				// fix the top corners.
+				points.push_back(new Point(p0, Vec3(0, 0, 0), Vec3(0, 0, 0), m_fMass, (i == 0 || i + 1 == height) && (j == 0 || j + 1 == width)));
+			}
+		}
+
+		// * Springs * //
+		springs.clear();
+		// Horizontal connections
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width - 1; j++)
+			{
+				s = Spring(m_fStiffness, restLen, m_fDamping, i * width + j, i * width + j + 1);
+				springs.push_back(s);
+			}
+		}
+		// Vertical connections
+		for (int j = 0; j < width; j++)
+		{
+			for (int i = 0; i < height - 1; i++)
+			{
+				s = Spring(m_fStiffness, restLen, m_fDamping, i * width + j, (i + 1) * width + j);
+				springs.push_back(s);
+			}
+		}
+		break;
+	}
 	default:
 		break;
 	}
@@ -134,6 +186,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 			cout << "Demo 5 selected.\n";
 			cout << "Initialized leap-frog assuming a timestep of: " << timestep << ".\n\n";
 			// Initialize velocities
+		case 2:
 			applyForcesToCurrentPoints(Vec3(0, -9, 0));
 			for (Point* p : points) {
 				p->initializeLeapFrog(timestep);
@@ -158,7 +211,7 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 	case 0:
 		makeMidpointStep(timeStep, Vec3(0, -9, 0));
 		break;
-	case 1:
+	case 1: case 2:
 		makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
 		break;
 	default:
