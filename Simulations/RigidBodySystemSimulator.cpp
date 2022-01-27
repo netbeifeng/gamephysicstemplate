@@ -42,7 +42,7 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 	case 0: case 1:
 	{
 		bodies.clear();
-		RigidBody body(2, Vec3(1, 0.6, 0.5), Vec3(0.0, 0.0, 0.0));
+		RigidBody body(2, Vec3(1, 0.6, 0.5), Vec3(0.0, 0.0, 0.0), 0.8);
 		body.setOrientation(Quat(0, 0, M_PI / 2));
 		body.setForce(Vec3(1, 1, 0), Vec3(0.3, 0.5, 0.25));
 		bodies.push_back(body);
@@ -57,10 +57,11 @@ void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
 		RigidBody body2(200000, Vec3(0.5, 0.5, 0.5), Vec3(0.0, 0.0, 0.0));
 		body2.setVelocity(Vec3(0.0, 0.0, 0.0));
 		*/
-		RigidBody body1(2, Vec3(0.5, 0.5, 0.5), Vec3(-1.0, 0.0, 0.0));
+		RigidBody body1(2, Vec3(0.5, 0.5, 0.5), Vec3(-1.0, 0.0, 0.0), 0.8);
 		body1.setForce(Vec3(1, 1, 0), Vec3(-1.5,0.5,0.5));
-		RigidBody body2(2, Vec3(0.5, 0.5, 0.5), Vec3(1.0, 0.0, 0.0));
+		RigidBody body2(2, Vec3(0.5, 0.5, 0.5), Vec3(1.0, 0.0, 0.0), 0.8);
 		body2.setForce(Vec3(-1, 1, 0), Vec3(1.5,0.5,0.5));
+		body2.setOrientation(Quat(0, 0, M_PI / 2));
 		bodies.push_back(body1);
 		bodies.push_back(body2);
 		break;
@@ -165,7 +166,7 @@ void RigidBodySystemSimulator::simulateCollision()
 		
 		float J = J1 / J2;
 		bodies[0].setImpulse(J, x_a, n);
-		bodies[1].setImpulse(-J, x_b, n);
+		bodies[1].setImpulse(J, x_b, -n);
 	}
 }
 
@@ -206,7 +207,7 @@ void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
 }
 void RigidBodySystemSimulator::addRigidBody(Vec3 position, Vec3 size, int mass) 
 {
-	RigidBody body(mass, size, position);
+	RigidBody body(mass, size, position, 0.8);
 	bodies.push_back(body);
 }
 void RigidBodySystemSimulator::setOrientationOf(int i, Quat orientation) 

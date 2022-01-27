@@ -16,6 +16,8 @@ float Spring::getRestLength() { return restLength; }
 float Spring::getStiffness() { return stiffness; }
 Point* Spring::getP1(std::vector<Point*> points) { return points[p1]; }
 Point* Spring::getP2(std::vector<Point*> points) { return points[p2]; }
+int Spring::getP1() { return p1; }
+int Spring::getP2() { return p2; }
 
 Vec3 Spring::getHookeForce(std::vector<Point*> points)
 {

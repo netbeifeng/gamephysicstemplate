@@ -230,7 +230,6 @@ void DiffusionSimulator::drawObjects()
 			DUC->drawSphere(pos, 0.1);
 		}
 	}
-	
 }
 
 

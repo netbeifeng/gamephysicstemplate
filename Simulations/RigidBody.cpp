@@ -2,11 +2,12 @@
 
 
 // Construtors
-RigidBody::RigidBody(float b_mass, Vec3 b_size, Vec3 x_cm)
+RigidBody::RigidBody(float b_mass, Vec3 b_size, Vec3 x_cm, float c)
 {
 	this->b_mass = b_mass;
 	this->b_size = b_size;
 	this->x_cm = x_cm;
+	this->c = c;
 
 	v_cm = Vec3(0, 0, 0);
 	r = Quat(0, 0, 0, 0);
@@ -146,3 +147,30 @@ Vec3 RigidBody::getW()
 {
 	return w;
 }
+
+/*
+int RigidBody::isInBody(Vec3 p)
+{
+	int result = 0;
+
+	// choose a proper r
+	float r = 1;
+
+	if (p.x >= x_cm.x - r && p.x <= x_cm.x + r
+		&& p.y >= x_cm.y - r && p.y <= x_cm.y + r) {
+		result = 1;
+	}
+	
+	return result;
+}
+*/
+void RigidBody::setXcm(Vec3 p)
+{
+	x_cm = p;
+}
+
+float RigidBody::getC()
+{
+	return c;
+}
+

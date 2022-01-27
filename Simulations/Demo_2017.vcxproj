@@ -225,6 +225,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DiffusionSimulator.cpp" />
+    <ClCompile Include="ForceBasedCoupling.cpp" />
     <ClCompile Include="MassPoint.cpp" />
     <ClCompile Include="RigidBody.cpp" />
     <ClCompile Include="RigidBodySystemSimulator.cpp" />
@@ -239,6 +240,7 @@
     <ClInclude Include="collisionDetect.h" />
     <ClInclude Include="DiffusionSimulator.h" />
     <ClInclude Include="DrawingUtilitiesClass.h" />
+    <ClInclude Include="ForceBasedCoupling.h" />
     <ClInclude Include="general.h" />
     <ClInclude Include="MassPoint.h" />
     <ClInclude Include="MassSpringSystemSimulator.h" />

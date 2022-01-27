@@ -12,7 +12,7 @@ using namespace GamePhysics;
 class RigidBody {
 public:
 	// Construtors
-	RigidBody(float b_mass, Vec3 b_size, Vec3 x_cm);
+	RigidBody(float b_mass, Vec3 b_size, Vec3 x_cm, float c);
 
 	// Functions
 	Mat4 Obj2WorldMatrix();
@@ -29,6 +29,10 @@ public:
 	void setImpulse(float J, Vec3 x_i, Vec3 n);
 	Vec3 getW();
 
+	//int isInBody(Vec3 position);
+	void setXcm(Vec3 position);
+	float getC();
+
 private:
 	// Attributes
 	float b_mass;		// Body's mass
@@ -41,6 +45,7 @@ private:
 	Mat4 I;		// Inverse of Inertia Tensor
 	Vec3 q;		// Torque
 	Vec3 f;		// Force: need total force to computer v_cm
+	float c;	// bounciness coefficient
 };
 
 #endif

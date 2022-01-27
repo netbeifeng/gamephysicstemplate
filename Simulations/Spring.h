@@ -15,6 +15,8 @@ public:
 	Point* getP2(std::vector<Point*> points);
 	float getRestLength();
 	float getStiffness();
+	int getP1();
+	int getP2();
 
 	Vec3 getHookeForce(std::vector<Point*>);
 	void applyElasticForceToPoints(std::vector<Point*>);

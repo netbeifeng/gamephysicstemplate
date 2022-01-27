@@ -1,12 +1,16 @@
 #pragma once
 
 #include "util/vectorbase.h"
+#include "util/quaternion.h"
+#include "Simulator.h"
+
+using namespace std;
 using namespace GamePhysics;
 
 class Point
 {
 public:
-	Point(Vec3 p = Vec3(0, 0, 0), Vec3 v = Vec3(0, 0, 0), Vec3 f = Vec3(0, 0, 0), float m = 0, bool fixed = 0);
+	Point(Vec3 p, Vec3 v, Vec3 f, float m, bool fixed, float c, float radius);
 	void setPosition(Vec3);
 	void setVelocity(Vec3);
 	Vec3 getPosition();
@@ -15,7 +19,7 @@ public:
 	float getMass() { return mass; }
 
 	void clearForce();
-	void addForce(Vec3 f);
+	void addForce(Vec3 f, Vec3 p);
 	void addAcceleration(Vec3 a);
 	Point* integrated(float);
 	void integrate(float);
@@ -23,10 +27,23 @@ public:
 	void initializeLeapFrog(float);
 	void integrateLeapFrog(float);
 
+	//int isInPoint(Vec3 position);
+	Mat4 Obj2WorldMatrix();
+	float getC();
+	Vec3 getW();
+	Mat4 getI();
+
 private:
 	Vec3 position;
 	Vec3 velocity;
 	Vec3 force;
 	float mass;
 	bool fixed;
+
+	float c;		// bounciness coefficient
+	float radius;	// regard a point as a sphere
+	Vec3 L;		// Angular Momentum
+	Vec3 w;		// Angular Velocity
+	Mat4 I;		// Inverse of Inertia Tensor
+	Vec3 q;		// Torque
 };

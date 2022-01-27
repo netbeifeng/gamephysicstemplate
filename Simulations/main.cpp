@@ -24,7 +24,8 @@ using namespace GamePhysics;
 //#define MASS_SPRING_SYSTEM
 //#define RIGID_BODY_SYSTEM
 //#define SPH_SYSTEM
-#define DIFFUSION_SYSTEM
+//#define DIFFUSION_SYSTEM
+#define FORCE_BASED_COUPLING
 
 #ifdef TEMPLATE_DEMO
 //#include "TemplateSimulator.h"
@@ -40,7 +41,11 @@ using namespace GamePhysics;
 #endif
 
 #ifdef DIFFUSION_SYSTEM
-#include "DiffusionSimulator.h"
+//#include "DiffusionSimulator.h"
+#endif
+
+#ifdef FORCE_BASED_COUPLING
+#include "ForceBasedCoupling.h"
 #endif
 
 DrawingUtilitiesClass * g_pDUC;
@@ -381,6 +386,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef DIFFUSION_SYSTEM
 	g_pSimulator= new DiffusionSimulator();
+#endif
+#ifdef FORCE_BASED_COUPLING
+	g_pSimulator = new ForceBasedCoupling();
 #endif
 	g_pSimulator->reset();
 
