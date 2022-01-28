@@ -174,3 +174,8 @@ float RigidBody::getC()
 	return c;
 }
 
+void RigidBody::clearVelocity()
+{
+	v_cm = Vec3(0, 0, 0);
+}
+

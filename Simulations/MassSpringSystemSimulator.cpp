@@ -69,8 +69,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		m0 = 10, m1 = 10;
 
 		// The point objects:
-		pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false, 0.8, 0.05);
-		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false, 0.8, 0.05);
+		pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false, 0.8);
+		pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false, 0.8);
 
 		// Push points onto the attribute
 		for (auto p : points) { delete p; }
@@ -115,7 +115,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 				p0 = Vec3(-0.5 + j * stepSize, 0.5 - i * stepSize, i * stepSize/10);
 				// Push point onto the attribute, with a small upward velocity, and no force;
 				// fix the top corners.
-				points.push_back(new Point(p0, Vec3(0,1,0), Vec3(0,0,0), m_fMass, i == 0 && (j == 0 || j+1==width), 0.8, 0.05));
+				points.push_back(new Point(p0, Vec3(0,1,0), Vec3(0,0,0), m_fMass, i == 0 && (j == 0 || j+1==width), 0.8));
 			}
 		}
 
@@ -165,8 +165,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 			// Reset scene
 			for (auto p : points) { delete p; }
 			points.clear();
-			pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false, 0.8, 0.05);
-			pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false, 0.8, 0.05);
+			pt0 = new Point(p0, v0, Vec3(0, 0, 0), m0, false, 0.8);
+			pt1 = new Point(p1, v1, Vec3(0, 0, 0), m1, false, 0.8);
 			points.push_back(pt0);
 			points.push_back(pt1);
 

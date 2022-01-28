@@ -1,6 +1,6 @@
 #include "MassPoint.h"
 
-Point::Point(Vec3 p, Vec3 v, Vec3 f, float m, bool b, float c, float radius)
+Point::Point(Vec3 p, Vec3 v, Vec3 f, float m, bool b, float c)
 {
 	position = p;
 	velocity = v;
@@ -9,19 +9,14 @@ Point::Point(Vec3 p, Vec3 v, Vec3 f, float m, bool b, float c, float radius)
 	fixed = b;
 
 	this->c = c;
-	this->radius = radius;
-	L = Vec3(0, 0, 0);
-	w = Vec3(0, 0, 0);
-	q = Vec3(0, 0, 0);
-	// height = 2 * radius
-	I = Mat4(1 / (2 * m * radius * radius), 0, 0, 0,
-		0, 1 / (2 * m * radius * radius), 0, 0,
-		0, 0, 1 / (2 * m * radius * radius), 0,
-		0, 0, 0, 0);
 }
 
 void Point::setPosition(Vec3 p) { position = p; }
-void Point::setVelocity(Vec3 v) { velocity = v; }
+void Point::setVelocity(Vec3 v) { 
+	if (!fixed) {
+		velocity = v;
+	}
+}
 
 Vec3 Point::getPosition() { return position; }
 Vec3 Point::getVelocity() { return velocity; }
@@ -30,17 +25,14 @@ Vec3 Point::getForce() { return force; }
 void Point::clearForce() {
 	if (!fixed) {
 		force = Vec3(0, 0, 0);
-		q = Vec3(0, 0, 0);
 	}
 }
 
-void Point::addForce(Vec3 f, Vec3 p)
+void Point::addForce(Vec3 f)
 {
 	if (!fixed) {
 		force += f;
 
-		Vec3 x_i = (p.x-position.x, p.y-position.y, p.z-position.z);
-		q = q + cross(x_i, f);	// x_i = x_world - x_cm
 	}
 }
 
@@ -63,7 +55,7 @@ Point* Point::integrated(float timestep)
 	Vec3 accel = force / mass;
 	Vec3 vel = velocity + timestep * accel;
 	Vec3 pos = position + timestep * velocity;
-	return new Point(pos, vel, Vec3(0,0,0), mass, fixed, 0.1, 0.05);
+	return new Point(pos, vel, Vec3(0,0,0), mass, fixed, 0.1);
 }
 
 /*
@@ -77,8 +69,6 @@ void Point::integrate(float timestep)
 
 		Vec3 accel = force / mass;
 		velocity = velocity + timestep * accel;
-		L = L + timestep * q;
-		w = I * L;
 
 	}
 	clearForce();
@@ -141,8 +131,10 @@ int Point::isInPoint(Vec3 p)
 Mat4 Point::Obj2WorldMatrix()
 {
 	// not need rotMat because it is a sphere
+	// assume scale is 0.05
+	float radius = 0.05;
 	Mat4 scaleMat, translatMat, worldMatrix;
-	scaleMat.initScaling(2*radius, 2 * radius, 2 * radius);
+	scaleMat.initScaling(2 * radius, 2 * radius, 2 * radius);
 	translatMat.initTranslation(position.x, position.y, position.z);
 	worldMatrix = scaleMat * translatMat;
 	return worldMatrix;
@@ -153,11 +145,8 @@ float Point::getC()
 	return c;
 }
 
-Vec3 Point::getW()
+void Point::setFixed()
 {
-	return w;
+	fixed = true;
 }
-Mat4 Point::getI()
-{
-	return I;
-}
+

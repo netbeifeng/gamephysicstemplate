@@ -5,6 +5,7 @@
 #include "MassPoint.h"
 #include "Spring.h"
 
+
 class ForceBasedCoupling :public Simulator {
 public:
 	// Construtors
@@ -21,6 +22,9 @@ public:
 	void onClick(int x, int y);
 	void onMouse(int x, int y);
 
+	int BPCollision(int b, int p);
+	int BBCollision(int b1, int b2);
+
 private:
 	// Mass Spring
 	vector<Point*> points;
@@ -34,6 +38,10 @@ private:
 	Point2D m_mouse;
 	Point2D m_trackmouse;
 	Point2D m_oldtrackmouse;
+
+	// game
+	int count;
+	int total;
 
 };
 

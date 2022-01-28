@@ -32,6 +32,7 @@ public:
 	//int isInBody(Vec3 position);
 	void setXcm(Vec3 position);
 	float getC();
+	void clearVelocity();
 
 private:
 	// Attributes
