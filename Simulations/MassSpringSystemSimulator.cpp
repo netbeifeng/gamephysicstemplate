@@ -189,6 +189,25 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 }
 
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
+	if (m_iTestCase == 0 || m_iTestCase == 1)
+	{
+		// Apply the mouse deltas to point[0] (move along cameras view plane)
+		Point2D mouseDiff;
+		mouseDiff.x = m_trackmouse.x - m_oldtrackmouse.x;
+		mouseDiff.y = m_trackmouse.y - m_oldtrackmouse.y;
+		if (mouseDiff.x != 0 || mouseDiff.y != 0)
+		{
+			Mat4 worldViewInv = Mat4(DUC->g_camera.GetWorldMatrix() * DUC->g_camera.GetViewMatrix());
+			worldViewInv = worldViewInv.inverse();
+			Vec3 inputView = Vec3((float)mouseDiff.x, (float)-mouseDiff.y, 0);
+			Vec3 inputWorld = worldViewInv.transformVectorNormal(inputView);
+			// find a proper scale!
+			float inputScale = 0.000015f;
+			inputWorld = inputWorld * inputScale;
+			Vec3 curpos = points[0]->getPosition();
+			points[0]->setPosition(curpos + inputWorld);
+		}
+	}
 }
 
 void MassSpringSystemSimulator::simulateTimestep(float timeStep)
@@ -214,6 +233,7 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 			s->applyImpulse(J, -normal);
 			p->setPosition(p->getPosition() + timeStep * J * normal / p->getMass());
 			s->setPosition(s->getPosition() - timeStep * J * normal / s->getMass());
+			//p->setPosition(s->getPosition() + s->getRadius() * normal);
 		}
 	}
 	enforceFloorBoundary();
