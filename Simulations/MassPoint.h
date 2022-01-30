@@ -19,9 +19,6 @@ public:
 	void clearForce();
 	void addForce(Vec3 f);
 	void addAcceleration(Vec3 a);
-	MassPoint* integrated(float);
-	void integrate(float);
-	void integrateWithMidpoint(float, MassPoint*);
 
 private:
 	Vec3 m_position;

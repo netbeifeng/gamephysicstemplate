@@ -51,6 +51,11 @@ public:
 		m_iIntegrator = integrator;
 	}
 
+	// for ex4
+	void initFrameObjects();
+	void addMassPoint(Vec3 pos, Vec3 vel, Vec3 foc, float mass, bool fixed);
+	void addSpring(float stif, float rl, float damping, int pdx1, int pdx2);
+	vector<MassPoint*> getMassPoints();
 private:
 	// Data Attributes
 	float m_fMass;

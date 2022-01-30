@@ -134,6 +134,7 @@ void RigidBody::setInetriaTensor(Mat4 it) {
 void RigidBody::integrate(float timeStep) {
 	// Refer to lecture05-rigid-bodies-3D.pdf Slide 14
 	if (!m_isFixed) {
+		m_force += Vec3(0, -9.8f, 0);
 		calculateTorque(m_force, m_forceLoc);
 		updateCenterPosition(timeStep * m_linearVelocity); // update pos
 		updateLinearVelocity(timeStep * (m_force / m_mass)); // update linear velocity

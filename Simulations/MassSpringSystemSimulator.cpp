@@ -37,10 +37,55 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	for each (Spring s in m_springs)
 	{
 		DUC->drawLine(s.getP1(m_points)->getPosition(), Vec3(1, 0, 0), s.getP2(m_points)->getPosition(), Vec3(0, 1, 0));
+
 	}
 	DUC->endLine();
+	for each (Spring s in m_springs)
+	{
+		DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, 0.6 * Vec3(1, 1, 1));
+		DUC->drawSphere(s.getP1(m_points)->getPosition(), Vec3(0.008, 0.008, 0.008));
+		DUC->drawSphere(s.getP2(m_points)->getPosition(), Vec3(0.008, 0.008, 0.008));
+	}
+}
+void MassSpringSystemSimulator::addMassPoint(Vec3 pos, Vec3 vel, Vec3 foc, float mass, bool fixed) {
+	m_points.push_back(new MassPoint(pos, vel, foc, mass, fixed));
 }
 
+void MassSpringSystemSimulator::addSpring(float stif, float rl, float damping, int pdx1, int pdx2) {
+	m_springs.push_back(Spring(stif, rl, damping, pdx1, pdx2));
+}
+
+void MassSpringSystemSimulator::initFrameObjects() {
+	
+	float restLength = 0.1f;
+	setStiffness(700);
+	m_points.clear();
+	m_springs.clear();
+	int height = 11, width = 11;
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			m_points.push_back(new MassPoint(Vec3(-0.5 + 0.1 * j, 0.4 , -0.5 + 0.1 * i), Vec3(0,0,0), Vec3(0,0,0), m_fMass, false));
+		}
+	}
+
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width - 1; j++)
+		{
+			m_springs.push_back(Spring(m_fStiffness, restLength, m_fDamping, i * width + j, i * width + j + 1));
+		}
+	}
+	for (int j = 0; j < width; j++)
+	{
+		for (int i = 0; i < height - 1; i++)
+		{
+			m_springs.push_back(Spring(m_fStiffness, restLength, m_fDamping, i * width + j, (i + 1) * width + j));
+		}
+	}
+}
+vector<MassPoint*> MassSpringSystemSimulator::getMassPoints() {
+	return m_points;
+}
 /*
 Reacts to change in test case (e.g. the drop-down menu, or when "reset scene" is pressed).
 - Sets up scene, and
@@ -270,6 +315,7 @@ void MassSpringSystemSimulator::addGravity(Vec3 g)
 }
 
 void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
+	//std::cout << "Enter" << std::endl;
 	for each (Spring s in m_springs) {
 		// compute and update force
 		s.applyElasticForceToPoints(m_points);
@@ -278,6 +324,7 @@ void MassSpringSystemSimulator::makeEulerStep(float timeStep) {
 	for each (MassPoint * p in m_points) {
 		if (!p->getFixed()) {
 			p->setPosition(p->getPosition() + timeStep * p->getVelocity());
+			//std::cout << p->getForce() << " | " << p->getMass() << std::endl;
 			p->setVelocity(p->getVelocity() + timeStep * (p->getForce() / p->getMass()));
 		}
 		p->clearForce();

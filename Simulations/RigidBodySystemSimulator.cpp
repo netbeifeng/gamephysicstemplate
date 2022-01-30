@@ -13,7 +13,7 @@ RigidBodySystemSimulator::RigidBodySystemSimulator()
 	m_oldtrackmouse = { 0,0 };
 
 	// intialize
-	m_Bounciness = .95f;
+	m_Bounciness = .7;
 	m_floorAndWalls.clear();
 	m_rigidBodyList.clear();
 }
@@ -41,7 +41,7 @@ void RigidBodySystemSimulator::reset()
 	m_oldtrackmouse.x = m_oldtrackmouse.y = 0;
 
 	// reset variables
-	m_Bounciness = .95f;
+	m_Bounciness = 0.7;
 	m_floorAndWalls.clear();
 	m_rigidBodyList.clear();
 }
@@ -52,13 +52,38 @@ float RigidBodySystemSimulator::getNormOfVector(Vec3 v) {
 }
 
 void RigidBodySystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateContext) {
+	//std::cout << m_rigidBodyList.size() << std::endl;
+
 	for each (RigidBody * rb in m_rigidBodyList) {
+		//std::cout << "Involved 0" << std::endl;
 		drawRigidBodyFrame(rb, true);
 	}
-
-	if (m_iTestCase == 3) {
+	//drawRigidBodyFrame(m_floorAndWalls[m_floorAndWalls.size() - 1], true);
+	//if (m_iTestCase == 3) {
 		drawFloorAndWall();
-	}
+	//}
+}
+
+void RigidBodySystemSimulator::addRigidBody_ex4(Vec3 pos, Vec3 size, int mass) {
+	addRigidBody(pos, size, mass);
+}
+
+void RigidBodySystemSimulator::initFrameObjects() {
+	//std::cout << "Involved 1" << std::endl;
+	m_floorAndWalls.clear();
+	m_rigidBodyList.clear();
+	//std::cout << m_rigidBodyList.size() << std::endl;
+	addRigidBody(Vec3(0, -0.25, 0), Vec3(0.5, 0.5, 0.5), 2);
+	applyForceOnBody(0, Vec3(0.25, 0.25, 0.25), Vec3(0, 0, 0));
+	setOrientationOf(0, Quat(0, 0, 0));
+
+	//std::cout << m_rigidBodyList[0]->getColor() << std::endl;
+	setUpFloorAndWalls();
+	//std::cout << m_rigidBodyList.size() << std::endl;
+}
+
+void RigidBodySystemSimulator::addGravity(Vec3 g) {
+
 }
 
 void RigidBodySystemSimulator::notifyCaseChanged(int testCase)
@@ -211,7 +236,14 @@ void RigidBodySystemSimulator::onMouse(int x, int y)
 
 void RigidBodySystemSimulator::addRigidBody(Vec3 position, Vec3 size, int mass)
 {
-	m_rigidBodyList.push_back(new RigidBody(position, size, mass)); 
+	if (mass > 99999) {
+		RigidBody* rb = new RigidBody(position, size, mass);
+		rb->setAsFixed();
+		m_rigidBodyList.push_back(rb);
+	}
+	else {
+		m_rigidBodyList.push_back(new RigidBody(position, size, mass));
+	}
 }
 
 void RigidBodySystemSimulator::applyForceOnBody(int i, Vec3 loc, Vec3 force)
@@ -298,12 +330,14 @@ void RigidBodySystemSimulator::checkCollision() {
 		}
 	}
 }
-
+vector<RigidBody*> RigidBodySystemSimulator::getWalls() {
+	return m_floorAndWalls;
+}
 // calculate the impulse and update the velocity and position
 void RigidBodySystemSimulator::calculateCollision(RigidBody* rigidBody1, RigidBody* rigidBody2) {
 	CollisionInfo collisionInfo = checkCollisionSAT(rigidBody1->getToWorldMatrix(), rigidBody2->getToWorldMatrix());
 	if (collisionInfo.isValid && (!rigidBody1->isFixed() || !rigidBody2->isFixed())) {
-		//std::cout << "Collide!" << std::endl;
+		std::cout << "Collide!" << std::endl;
 		Vec3 normal = collisionInfo.normalWorld;
 		Vec3 collisionPoint = collisionInfo.collisionPointWorld;
 
@@ -397,10 +431,16 @@ void RigidBodySystemSimulator::drawRigidBodyFrame(RigidBody* rb, bool drawBody) 
 	// Vertices
 	for (Vec3 vertex : rb->getVertices()) {
 		DUC->setUpLighting(Vec3(), 0.4 * Vec3(1, 1, 1), 100, Vec3(1, 1, 1));
-		DUC->drawSphere(vertex, 0.01f);
+		DUC->drawSphere(vertex, 0.0005f);
 	}
 }
+void RigidBodySystemSimulator::addImmo(Vec3 pos, Vec3 size) {
+	RigidBody* immo = new RigidBody(pos, size, INFINITY);
 
+	m_rigidBodyList.push_back(new RigidBody(pos, size, INFINITY));
+	immo->setUpRotation(Quat(0, 0, 0));
+	immo->computeWorldMatrix();
+}
 // build boundary walls
 void RigidBodySystemSimulator::setUpFloorAndWalls() {
 	

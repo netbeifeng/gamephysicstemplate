@@ -49,12 +49,19 @@ public:
 
 	// Helper functions
 	float getNormOfVector(Vec3 v);
+
+	// for ex4
+	void initFrameObjects();
+	void addGravity(Vec3 gravity);
+	void addRigidBody_ex4(Vec3 pos, Vec3 size, int mass);
+	void addImmo(Vec3 pos, Vec3 size);
+	vector<RigidBody*> getWalls();
 private:
 	// Attributes
 	// add your RigidBodySystem data members, for e.g.,
 	// RigidBodySystem * m_pRigidBodySystem; 
 
-	float m_Bounciness = 1.f; // fully plastic 1.f for elastic
+	float m_Bounciness = 0; // fully plastic 1.f for elastic
 
 	vector<RigidBody*> m_rigidBodyList; // rigid body list
 	vector<RigidBody*> m_floorAndWalls; // wall list
