@@ -42,6 +42,7 @@ private:
 	// game
 	int count;
 	int total;
+	int time;
 
 };
 

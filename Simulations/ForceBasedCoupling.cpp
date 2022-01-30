@@ -12,6 +12,7 @@ ForceBasedCoupling::ForceBasedCoupling()
 
 	count = 0;
 	total = 0;
+	time = 0;
 }
 
 const char* ForceBasedCoupling::getTestCasesStr() {
@@ -67,6 +68,7 @@ void ForceBasedCoupling::drawFrame(ID3D11DeviceContext* pd3dImmediateContext)
 void ForceBasedCoupling::notifyCaseChanged(int testCase)
 {
 	m_iTestCase = testCase;
+	time = 0;	// reset time
 
 	// Setup
 	switch (testCase)
@@ -183,6 +185,8 @@ void ForceBasedCoupling::simulateTimestep(float timeStep, int m, int n)
 	}
 	case 1:
 	{
+		time++;
+
 		// rigid body
 		for (int i = 0; i < bodies.size(); i++) {
 			bodies[i].integrate(timeStep);
@@ -264,7 +268,8 @@ void ForceBasedCoupling::simulateTimestep(float timeStep, int m, int n)
 				bodies.erase(bodies.begin() + i);	// delete this body
 				if (count == total) {
 					// goal: minimize the time
-					cout << "Wow, you win in " << "!" << endl;
+					float times = time * timeStep;
+					cout << "Wow, you win in " << times << "s!" << endl;
 				}
 			}
 		}
