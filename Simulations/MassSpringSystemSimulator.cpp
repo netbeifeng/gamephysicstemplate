@@ -316,7 +316,7 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 		if (!g_reached)
 		{
 			Vec3 pos = spheres.at(0)->getPosition();
-			if (pos.z < g_top_left.z && g_top_left.x < pos.x && pos.x < g_top_left.x+g_width
+			if (pos.z < g_top_left.z && g_top_left.z - 0.5 < pos.z && g_top_left.x < pos.x && pos.x < g_top_left.x+g_width
 				&& pos.y < g_top_left.y && g_top_left - g_height< pos.y)
 			{
 				std::cout << "Reached goal!";
