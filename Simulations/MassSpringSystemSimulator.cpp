@@ -212,7 +212,8 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 			float J = -(1 + s->getBounciness()) * dot(rel_vel, normal) / (1/s->getMass() + 1/p->getMass());
 			p->applyImpulse(J, normal);
 			s->applyImpulse(J, -normal);
-			p->setPosition(s->getPosition() + s->getRadius() * normal);
+			p->setPosition(p->getPosition() + timeStep * J * normal / p->getMass());
+			s->setPosition(s->getPosition() - timeStep * J * normal / s->getMass());
 		}
 	}
 	enforceFloorBoundary();
