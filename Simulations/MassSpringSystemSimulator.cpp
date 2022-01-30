@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Vertical,Horizontal";
+	return "Vertical,Horizontal,Game";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -45,6 +45,19 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	DUC->setUpLighting(Vec3(0, 0, 0), Vec3(1, 1, 1), 0.1, Vec3(grey, grey, grey));
 	for (RigidBodySphere* s : spheres)
 		DUC->drawSphere(s->getPosition(), s->getRadius());
+
+	// Draw goal
+	if (m_iTestCase == 2) {
+		Vec3 top_right = g_top_left + Vec3(g_width, 0, 0),
+			bot_left = g_top_left - Vec3(0, g_height, 0),
+			bot_right = bot_left + Vec3(g_width, 0, 0);
+		DUC->beginLine();
+		DUC->drawLine(g_top_left, Vec3(1, 1, 1), top_right, Vec3(1, 1, 1));
+		DUC->drawLine(g_top_left, Vec3(1, 1, 1), bot_left, Vec3(1, 1, 1));
+		DUC->drawLine(bot_left, Vec3(1, 1, 1), bot_right, Vec3(1, 1, 1));
+		DUC->drawLine(bot_right, Vec3(1, 1, 1), top_right, Vec3(1, 1, 1));
+		DUC->endLine();
+	}
 }
 
 /*
@@ -177,6 +190,65 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		}
 		break;
 	}
+	case 2:
+	{
+		for (auto s : spheres) { delete s; }
+		spheres.clear();
+		spheres.push_back(new RigidBodySphere(Vec3(0, 2, 0), 0.1, 5));
+		g_reached = false;
+
+		// Construct a "sheet" of points connected with springs,
+		// with fixed corners.
+
+		// Rest length of the springs
+		double restLen = 0.075;
+		// Initial length of the springs
+		double stepSize = 0.075;
+		// Number of points: width*height
+		int width = 12; int height = 12;
+
+		// * Points * //
+		for (auto p : points) { delete p; }
+		points.clear();
+		for (double i = 0; i < height; i++)
+		{
+			for (double j = 0; j < width; j++)
+			{
+				// i running from from top=0.5 to bottom,
+				// j running from left=-0.5 to right
+				p0 = Vec3(-0.5 + j * stepSize, 0, 0.5 - i * stepSize);
+				// Push point onto the attribute, with a small upward velocity, and no force;
+				// fix the top corners.
+				points.push_back(new Point(p0, Vec3(0, 0, 0), Vec3(0, 0, 0), m_fMass, (i == 0 || i + 1 == height) && (j == 0 || j + 1 == width)));
+			}
+		}
+
+		// * Springs * //
+		springs.clear();
+		// Horizontal connections
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width - 1; j++)
+			{
+				s = Spring(m_fStiffness, restLen, m_fDamping, i * width + j, i * width + j + 1);
+				springs.push_back(s);
+			}
+		}
+		// Vertical connections
+		for (int j = 0; j < width; j++)
+		{
+			for (int i = 0; i < height - 1; i++)
+			{
+				s = Spring(m_fStiffness, restLen, m_fDamping, i * width + j, (i + 1) * width + j);
+				springs.push_back(s);
+			}
+		}
+
+		// Goal
+		g_width = 3, g_height = 2;
+		g_top_left = Vec3(0, 2, -2);
+		break;
+	}
 	default:
 		break;
 	}
@@ -189,7 +261,7 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 }
 
 void MassSpringSystemSimulator::externalForcesCalculations(float timeElapsed) {
-	if (m_iTestCase == 0 || m_iTestCase == 1)
+	if (m_iTestCase == 0 || m_iTestCase == 1 || m_iTestCase == 2)
 	{
 		// Apply the mouse deltas to point[0] (move along cameras view plane)
 		Point2D mouseDiff;
@@ -214,8 +286,9 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 {
 	// Integration
 	makeLeapFrogStep(timeStep, Vec3(0, -9, 0));
-	for(RigidBodySphere* s : spheres)
-		s->integrate(timeStep);
+	for (RigidBodySphere* s : spheres)
+		if (!g_reached)
+			s->integrate(timeStep);
 
 	// Collision detection
 	for (RigidBodySphere* s : spheres)
@@ -237,6 +310,20 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 		}
 	}
 	enforceFloorBoundary();
+
+	// Game
+	if (m_iTestCase == 2) {
+		if (!g_reached)
+		{
+			Vec3 pos = spheres.at(0)->getPosition();
+			if (pos.z < g_top_left.z && g_top_left.x < pos.x && pos.x < g_top_left.x+g_width
+				&& pos.y < g_top_left.y && g_top_left - g_height< pos.y)
+			{
+				std::cout << "Reached goal!";
+				g_reached = true;
+			}
+		}
+	}
 }
 
 void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)

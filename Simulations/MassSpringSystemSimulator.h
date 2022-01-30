@@ -68,5 +68,10 @@ private:
 	Point2D m_mouse;
 	Point2D m_trackmouse;
 	Point2D m_oldtrackmouse;
+
+	float g_width;
+	float g_height;
+	Vec3 g_top_left;
+	bool g_reached = false;
 };
 #endif
