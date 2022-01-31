@@ -16,7 +16,7 @@ MassSpringSystemSimulator::MassSpringSystemSimulator()
 /// *** UI functions *** ///
 
 const char* MassSpringSystemSimulator::getTestCasesStr() {
-	return "Vertical,Horizontal,Game";
+	return "Vertical,Horizontal,Game,SPH Test";
 }
 
 void MassSpringSystemSimulator::initUI(DrawingUtilitiesClass* DUC)
@@ -57,6 +57,14 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 		DUC->drawLine(bot_left, Vec3(1, 1, 1), bot_right, Vec3(1, 1, 1));
 		DUC->drawLine(bot_right, Vec3(1, 1, 1), top_right, Vec3(1, 1, 1));
 		DUC->endLine();
+
+	}
+	// SPH
+	if (sph)
+	{
+		sph->iterate([&](Vec3 p, float r) {
+			DUC->drawSphere(p, r / 5);
+			});
 	}
 }
 
@@ -73,6 +81,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 	Spring s;
 	Vec3 p0;
 
+	// Clear SPH
+	sph = NULL;
 	// ** Setup Scene ** //
 	switch (testCase)
 	{
@@ -249,6 +259,16 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		g_top_left = Vec3(0, 2, -2);
 		break;
 	}
+	case 3:
+	{
+		for (auto s : spheres) { delete s; }
+		spheres.clear();
+		for (auto p : points) { delete p; }
+		points.clear();
+		springs.clear();
+		sph = new SmoothParticleHydro(Vec3(0, 0, 0), Vec3(0, 1, 0), 0.1);
+	}
+		break;
 	default:
 		break;
 	}
@@ -324,6 +344,10 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 			}
 		}
 	}
+	// SPH
+	if (sph)
+		sph->integrate(timeStep);
+
 }
 
 void MassSpringSystemSimulator::applyForcesToCurrentPoints(Vec3 gravity)

@@ -4,6 +4,7 @@
 #include "MassPoint.h"
 #include "Spring.h"
 #include "RigidBodySphere.h"
+#include "SmoothParticleHydro.h"
 
 // Do Not Change
 #define EULER 0
@@ -73,5 +74,7 @@ private:
 	float g_height;
 	Vec3 g_top_left;
 	bool g_reached = false;
+	// SPH
+	SmoothParticleHydro* sph;
 };
 #endif
