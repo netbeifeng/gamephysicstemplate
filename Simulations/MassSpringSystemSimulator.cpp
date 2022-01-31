@@ -46,8 +46,8 @@ void MassSpringSystemSimulator::drawFrame(ID3D11DeviceContext* pd3dImmediateCont
 	for (RigidBodySphere* s : spheres)
 		DUC->drawSphere(s->getPosition(), s->getRadius());
 
-	// Draw goal
 	if (m_iTestCase == 2) {
+		// Draw goal
 		Vec3 top_right = g_top_left + Vec3(g_width, 0, 0),
 			bot_left = g_top_left - Vec3(0, g_height, 0),
 			bot_right = bot_left + Vec3(g_width, 0, 0);
@@ -312,23 +312,23 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 
 	// Collision detection
 	for (RigidBodySphere* s : spheres)
-	for (Point* p : points)
-	{
-		Vec3 direction = p->getPosition() - s->getPosition();
-		Vec3 distance = norm(direction);
-		Vec3 normal = direction / distance;
-
-		Vec3 rel_vel = p->getVelocity() - s->getVelocity();
-		if (distance <= s->getRadius())
+		for (Point* p : points)
 		{
-			float J = -(1 + s->getBounciness()) * dot(rel_vel, normal) / (1/s->getMass() + 1/p->getMass());
-			p->applyImpulse(J, normal);
-			s->applyImpulse(J, -normal);
-			p->setPosition(p->getPosition() + timeStep * J * normal / p->getMass());
-			s->setPosition(s->getPosition() - timeStep * J * normal / s->getMass());
-			//p->setPosition(s->getPosition() + s->getRadius() * normal);
+			Vec3 direction = p->getPosition() - s->getPosition();
+			Vec3 distance = norm(direction);
+			Vec3 normal = direction / distance;
+
+			Vec3 rel_vel = p->getVelocity() - s->getVelocity();
+			if (distance <= s->getRadius())
+			{
+				float J = -(1 + s->getBounciness()) * dot(rel_vel, normal) / (1 / s->getMass() + 1 / p->getMass());
+				p->applyImpulse(J, normal);
+				s->applyImpulse(J, -normal);
+				p->setPosition(p->getPosition() + timeStep * J * normal / p->getMass());
+				s->setPosition(s->getPosition() - timeStep * J * normal / s->getMass());
+				//p->setPosition(s->getPosition() + s->getRadius() * normal);
+			}
 		}
-	}
 	enforceFloorBoundary();
 
 	// Game
@@ -336,8 +336,8 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 		if (!g_reached)
 		{
 			Vec3 pos = spheres.at(0)->getPosition();
-			if (pos.z < g_top_left.z && g_top_left.z - 0.5 < pos.z && g_top_left.x < pos.x && pos.x < g_top_left.x+g_width
-				&& pos.y < g_top_left.y && g_top_left - g_height< pos.y)
+			if (pos.z < g_top_left.z && g_top_left.z - 0.5 < pos.z && g_top_left.x < pos.x && pos.x < g_top_left.x + g_width
+				&& pos.y < g_top_left.y && g_top_left - g_height < pos.y)
 			{
 				std::cout << "Reached goal!";
 				g_reached = true;
