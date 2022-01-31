@@ -341,6 +341,10 @@ void MassSpringSystemSimulator::simulateTimestep(float timeStep)
 			{
 				std::cout << "Reached goal!";
 				g_reached = true;
+				sph = new SmoothParticleHydro(pos, spheres.at(0)->getVelocity(), spheres.at(0)->getRadius());
+				for (RigidBodySphere* s : spheres)
+					delete s;
+				spheres.clear();
 			}
 		}
 	}
