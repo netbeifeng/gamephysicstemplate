@@ -255,8 +255,8 @@ void MassSpringSystemSimulator::notifyCaseChanged(int testCase, float timestep)
 		}
 
 		// Goal
-		g_width = 3, g_height = 2;
-		g_top_left = Vec3(0, 2, -2);
+		g_width = 4, g_height = 3;
+		g_top_left = Vec3(-1, 3, -2);
 		break;
 	}
 	case 3:

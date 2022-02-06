@@ -123,7 +123,7 @@ class SmoothParticleHydro
 public:
 	SmoothParticleHydro(Vec3 position, Vec3 velocity, float radius) {
 		Vec3 new_particle;
-		kernel_halfrad = 0.04;
+		kernel_halfrad = 0.03;
 		for (float x = position.x - radius; x < position.x + radius; x += kernel_halfrad)
 			for (float y = position.y - radius; y < position.y + radius; y += kernel_halfrad)
 				for (float z = position.z - radius; z < position.z + radius; z += kernel_halfrad)
@@ -132,8 +132,8 @@ public:
 					if (norm(position - new_particle) < radius)
 						particles.push_back(new Particle(new_particle, velocity, 1));
 				}
-		rest_density = 50000;
-		stiffness = 1;
+		rest_density = 10000;
+		stiffness = 0.5;
 		ds = 0;
 	}
 	void iterate(std::function<void(Vec3,float)> f)
